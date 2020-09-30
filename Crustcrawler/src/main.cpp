@@ -25,6 +25,7 @@ const float DXL_PROTOCOL_VERSION = 2.0;
 
 Dynamixel2Arduino dxl(DXL_SERIAL, DXL_DIR_PIN);
 
+
 //This namespace is required to use Control table item names
 using namespace ControlTableItem;
 
@@ -43,12 +44,8 @@ void setup() {
 
   // Turn off torque when configuring items in EEPROM area
   dxl.torqueOff(DXL_ID);
-  dxl.setOperatingMode(DXL_ID, OP_POSITION);
-  dxl.torqueOn(DXL_ID);
-  dxl.torqueOn(2);
-  dxl.torqueOn(3);
-  dxl.torqueOn(4);
-  dxl.torqueOn(5);
+  dxl.setOperatingMode(DXL_ID, OP_VELOCITY);
+  //dxl.torqueOn(DXL_ID);
 }
 
 void loop() {
@@ -64,7 +61,7 @@ void loop() {
   delay(1000);
 
   // Set Goal Position in DEGREE value
-  dxl.setGoalPosition(DXL_ID, 5.7, UNIT_DEGREE);
+  //dxl.setGoalPosition(DXL_ID, 5.7, UNIT_DEGREE);
   delay(1000);
   // Print present position in degree value
   DEBUG_SERIAL.print("Present Position(degree) : ");
