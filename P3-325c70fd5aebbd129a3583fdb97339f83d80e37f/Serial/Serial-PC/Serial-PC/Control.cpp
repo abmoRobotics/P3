@@ -3,6 +3,7 @@
 #include <string.h>
 #include <sstream>
 
+//Ikke lavet (den laver emil og anton i arduino)
 double getTorque()
 {
 	
@@ -32,9 +33,8 @@ double Control::getPosition(int motorID, char Data[256])
 	SP->WriteData(Data, sizeof(Data));
 
 	bool waitForRead = TRUE;
-	int i{};
 	while (readResult == 0) {
-		readResult = SP->ReadData(incomingData, dataLength);	
+		readResult = SP->ReadData(incomingData, dataLength);
 	}
 	incomingData[readResult] = 0;
 	int ai{};
