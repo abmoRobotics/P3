@@ -1,70 +1,133 @@
-/*******************************************************************************
-* Copyright 2016 ROBOTIS CO., LTD.
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*     http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*******************************************************************************/
+#include <string.h>
+#include "communication.h"
+#include <Wire.h> 
+#include <LiquidCrystal_I2C.h>
 
-#include <Dynamixel2Arduino.h>
+LiquidCrystal_I2C lcd(0x27,20,4);
 
-#define DXL_SERIAL   Serial1
-#define DEBUG_SERIAL Serial
-const uint8_t DXL_DIR_PIN = 2;
 
-const uint8_t DXL_ID = 1;
+
+const uint8_t Elbow = 1;
+const uint8_t Forearm = 2;
+const uint8_t Hand_vert = 3;
+const uint8_t Hand_hori = 4;
+const uint8_t GripperR = 5;
+const uint8_t GripperL = 6;
+
+
+
+const int redLED = 7;
+const int yellowLED = 6;
+const int greenLED = 5;
+
+
 const float DXL_PROTOCOL_VERSION = 2.0;
 
-Dynamixel2Arduino dxl(DXL_SERIAL, DXL_DIR_PIN);
 
 
 //This namespace is required to use Control table item names
 using namespace ControlTableItem;
 
-void setup() {
+
+#define DXL_SERIAL Serial1
+const uint8_t DXL_DIR_PIN = 2;
+Dynamixel2Arduino dxl(DXL_SERIAL, DXL_DIR_PIN);
+
+void setup()
+{
   // put your setup code here, to run once:
-  
+  pinMode(LED_BUILTIN, INPUT);
+  pinMode(5, OUTPUT);
+  pinMode(6, OUTPUT);
+  pinMode(7, OUTPUT);
   // Use UART port of DYNAMIXEL Shield to debug.
-  DEBUG_SERIAL.begin(115200);
+  Serial.begin(115200);
 
-  // Set Port baudrate to 57600bps. This has to match with DYNAMIXEL baudrate.
   dxl.begin(57600);
-  // Set Port Protocol Version. This has to match with DYNAMIXEL protocol version.
   dxl.setPortProtocolVersion(DXL_PROTOCOL_VERSION);
-  // Get DYNAMIXEL information
-  dxl.ping(DXL_ID);
 
-  // Turn off torque when configuring items in EEPROM area
-  dxl.torqueOff(DXL_ID);
-  dxl.setOperatingMode(DXL_ID, OP_VELOCITY);
-  //dxl.torqueOn(DXL_ID);
+  for (size_t i = 1; i < 7; i++)
+  {
+    dxl.torqueOff(i);
+    dxl.setOperatingMode(i, OP_POSITION);
+    dxl.torqueOn(i);
+  }
+
+
+
+  lcd.init();                      // initialize the lcd 
+  lcd.backlight();
 }
 
-void loop() {
-  // put your main code here, to run repeatedly:
-  
-  // Please refer to e-Manual(http://emanual.robotis.com/docs/en/parts/interface/dynamixel_shield/) for available range of value. 
-  // Set Goal Position in RAW value
-  dxl.setGoalPosition(DXL_ID, 512);
-  delay(1000);
-  // Print present position in raw value
-  DEBUG_SERIAL.print("Present Position(raw) : ");
-  DEBUG_SERIAL.println(dxl.getPresentPosition(DXL_ID));
-  delay(1000);
 
-  // Set Goal Position in DEGREE value
-  //dxl.setGoalPosition(DXL_ID, 5.7, UNIT_DEGREE);
-  delay(1000);
-  // Print present position in degree value
-  DEBUG_SERIAL.print("Present Position(degree) : ");
-  DEBUG_SERIAL.println(dxl.getPresentPosition(DXL_ID, UNIT_DEGREE));
+void blinkLED(int Pin, int time)
+{
+  digitalWrite(Pin, HIGH);
+  delay(time);
+  digitalWrite(Pin, LOW);
+  delay(time);
+}
+
+
+void loop()
+{
+
+  bool useData = false;
+  int Data[3];
+  int i = 0;
+  while (Serial.available() > 0)
+  {
+    Data[i] = Serial.read();
+    i++;
+    useData = true;
+  }
+  lcd.clear();
+  lcd.setCursor(0,0);
+  lcd.print(Data[0]);
+  lcd.setCursor(5,0);
+  lcd.print(Data[1]);
+  lcd.setCursor(9,0);
+  lcd.print(Data[2]);
+
+  if (useData == true)
+  {
+    switch (Data[0])
+    {
+    case 10:
+      communication::setTorque(Data[1], Data[2], dxl);
+    break;
+
+    case 11:
+      communication::getTorque(Data[1], dxl);
+      break;
+    
+    case 12:
+      int test = communication::getPosition(Data[1], dxl);
+      Serial.write((int)communication::getPosition(Data[1], dxl));
+      lcd.setCursor(0,1);
+      lcd.print(test);
+    break;
+
+    case 13:
+      communication::setPosition(Data[1], Data[2], dxl);
+    break;
+
+    case 14: 
+    communication::getVelocity(Data[1], dxl);
+    break;
+
+    case 15:
+    communication::setVelocity(Data[1], Data[2], dxl);
+    break;
+    
+    default:
+      digitalWrite(13, HIGH);
+      delay(500);
+      digitalWrite(13, LOW);
+      delay(500);
+      break;
+    }
+    useData = false;
+  }
   delay(1000);
 }

@@ -19,35 +19,17 @@ int _tmain(int argc, _TCHAR* argv[])
 
 
 
-	while (Test.isConnected())
-	{
+	//while (Test.isConnected())
+	//{
 
-		Test.setTorque(10, Test.Data, 1);
-		Sleep(5000);
-		Test.setTorque(20, Test.Data, 2);
-		Sleep(5000);
-		std::cout << Test.getPosition(1, Test.Data) << std::endl;
-		Sleep(5000);
-		std::cout << Test.getPosition(2, Test.Data) << std::endl;
 		
+
 		
-		
-		/*SP->WriteData(Test.Data, sizeof(Test.Data));
-		Sleep(5000);
-		Test.Data[1]++;
-		SP->WriteData(Test.Data, sizeof(Test.Data));
-		Sleep(5000);
-		Test.Data[0] = 2;
-		Test.Data[1] = 1;
-		SP->WriteData(Test.Data, sizeof(Test.Data));
-		Sleep(5000);
-		Test.Data[1]++;
-		SP->WriteData(Test.Data, sizeof());
-		Sleep(5000);*/
+	//}
+	Test.setPosition(Test.getPosition(1, Test.Data) + 100, Test.Data, 1);
+	Sleep(2000);
+	Test.setPosition(Test.getPosition(2, Test.Data) + 100, Test.Data, 2);
+	Sleep(2000);
 
-
-
-
-	}
 	return 0;
 }

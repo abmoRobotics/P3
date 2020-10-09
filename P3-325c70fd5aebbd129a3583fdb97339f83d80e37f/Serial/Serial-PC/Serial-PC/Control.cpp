@@ -22,6 +22,34 @@ double Control::getPosition(int motorID, char Data[3])
 	Data[1] = motorID;
 	Data[2] = NULL;
 
+	char incomingData[256] = "";		// don't forget to pre-allocate memory
+	int dataLength = 255;
+	int readResult = 0;
+
+
+	SP->WriteData(Data, sizeof(Data));
+
+	bool waitForRead = TRUE;
+	while (readResult == 0) {
+		readResult = SP->ReadData(incomingData, dataLength);
+	}
+	int ia = (int)incomingData[0];
+	printf("%c", incomingData);
+	return ia;
+}; // Position in radians
+void Control::setPosition(double goalPos, char Data[3], int motorID)
+{
+	Data[0] = 13;
+	Data[1] = motorID;
+	Data[2] = goalPos;
+	SP->WriteData(Data, sizeof(Data));
+}; // Måske ikke lav
+double Control::getVelocity(int motorID, char Data[3])
+{
+	Data[0] = 14;
+	Data[1] = motorID;
+	Data[2] = NULL;
+
 	char incomingData[256] = "";			// don't forget to pre-allocate memory
 	int dataLength = 255;
 	int readResult = 0;
@@ -33,19 +61,15 @@ double Control::getPosition(int motorID, char Data[3])
 	while (readResult == 0) {
 		readResult = SP->ReadData(incomingData, dataLength);
 	}
+	printf("%c", incomingData[0]);
 	return incomingData[0];
-}; // Position in radians
-double setPosition() 
-{
-	return 0;
-}; // Måske ikke lav
-double getVelocity() 
-{
-	return 0;
 };
-double setVelocity() 
+void Control::setVelocity(double goalVel, char Data[3], int motorID)
 {
-	return 0;
+	Data[0] = 13;
+	Data[1] = motorID;
+	Data[2] = goalVel;
+	SP->WriteData(Data, sizeof(Data));
 };
 double getAcceleration() 
 {

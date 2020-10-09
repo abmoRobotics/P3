@@ -5,13 +5,13 @@
 class Control
 {
 public:
-    Serial* SP = new Serial("\\\\.\\COM11");    // adjust as needed
+    Serial* SP = new Serial("COM7");    // adjust as needed
     double getTorque() {};
     void setTorque(double goalTorque, char Data[3], int motorID); // Måske ikke lav
     double getPosition(int motorID, char Data[3]); // Position in radians
-    double setPosition() {}; // Måske ikke lav
-    double getVelocity() {};
-    double setVelocity() {};
+    void setPosition(double goalPos, char Data[3], int motorID); // Måske ikke lav
+    double getVelocity(int motorID, char Data[3]);
+    void setVelocity(double goalVel, char Data[3], int motorID);
     double getAcceleration() {};
     double setAcceleration() {};
     bool isConnected() { return SP->IsConnected(); };

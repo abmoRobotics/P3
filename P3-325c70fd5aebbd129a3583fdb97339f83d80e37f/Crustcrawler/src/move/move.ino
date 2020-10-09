@@ -32,8 +32,8 @@ dxl.led(motor5, 0);
 
 void setup()
 {
-    Serial.begin(115200);
-    dxl.    
+    
+    Serial.begin(115200);  
     delay(2000);
 
     DYNAMIXEL_SERIAL.begin(DYNAMIXEL_BAUDRATE);
@@ -52,9 +52,7 @@ void setup()
         dxl.torqueEnable(3, true);
         dxl.torqueEnable(4, true);
         dxl.torqueEnable(5, true);
-        dxl.accelerationLimit();
-        dxl.feedForwardAccelerationGain();
-        dxl.
+   
 }
 
 
@@ -64,11 +62,10 @@ void setup()
 void loop()
 {
     
-    gripperOpen();
+    if(Serial.read() == 1){ gripperOpen();}
+    else if(Serial.read() == 2){gripperClose();}
     Serial.print(dxl.presentCurrent(motor4));
     Serial.print("                  ");
     Serial.println(dxl.presentCurrent(motor5));
-    delay(3000);
-    gripperClose();
     delay(3000);
 }
