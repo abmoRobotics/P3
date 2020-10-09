@@ -1,6 +1,6 @@
 #include "Control.h"
-#include <iostream>
 
+//Ikke lavet (den laver emil og anton i arduino)
 double getTorque()
 {
 
@@ -8,6 +8,7 @@ double getTorque()
 }
 
 
+//Den skriver strøm(ikke testet) - dette skal konvereters til torque
 void Control::setTorque(double goalTorque, char Data[3], int motorID)
 {
 	Data[0] = 10;
@@ -16,6 +17,7 @@ void Control::setTorque(double goalTorque, char Data[3], int motorID)
  	SP->WriteData(Data, sizeof(Data));
 }; // Måske ikke lav
 
+//Færdig funktion - virker
 double Control::getPosition(int motorID, char Data[3])
 {
 	Data[0] = 12;
@@ -30,25 +32,24 @@ double Control::getPosition(int motorID, char Data[3])
 	SP->WriteData(Data, sizeof(Data));
 
 	bool waitForRead = TRUE;
-	int i{};
 	while (readResult == 0) {
-		readResult = SP->ReadData(incomingData, dataLength);	
+		readResult = SP->ReadData(incomingData, dataLength);
 	}
-	incomingData[readResult] = 0;
-	int ai{};
-	sscanf_s(incomingData, "%d", &ai);
-	std::cout << ai << std::endl;
-	
-	
-	return ai;
+	int ia = (int)incomingData[0];
+	printf("%c", incomingData);
+	return ia;
 }; // Position in radians
+
+//Den virker ikke, array kan ikke indeholde værdien til motoren
 void Control::setPosition(double goalPos, char Data[3], int motorID)
 {
-	Data[0] = 'D';
+	Data[0] = 13;
 	Data[1] = motorID;
 	Data[2] = goalPos;
 	SP->WriteData(Data, sizeof(Data));
 }; // Måske ikke lav
+
+//ikke testet
 double Control::getVelocity(int motorID, char Data[3])
 {
 	Data[0] = 14;
@@ -69,6 +70,8 @@ double Control::getVelocity(int motorID, char Data[3])
 	printf("%c", incomingData[0]);
 	return incomingData[0];
 };
+
+//ikke testet
 void Control::setVelocity(double goalVel, char Data[3], int motorID)
 {
 	Data[0] = 13;
