@@ -73,27 +73,34 @@ void loop()
 {
 
   bool useData = false;
-  int Data[3];
+  int Data[256];
+  char valueA[256];
   int i = 0;
   while (Serial.available() > 0)
   {
     Data[i] = Serial.read();
+    if(i > 1)
+    {
+      valueA[i] = Data[i];
+    }
     i++;
     useData = true;
   }
+  int Value{};
+  Value = atoi(valueA);
   lcd.clear();
   lcd.setCursor(0,0);
   lcd.print(Data[0]);
   lcd.setCursor(5,0);
   lcd.print(Data[1]);
   lcd.setCursor(9,0);
-  lcd.print(Data[2]);
+  lcd.print(Value);
   String test = communication::getPosition(Data[1], dxl);
   if (useData == true)
   {
     if (Data[0] == 10)
     {
-      communication::setTorque(Data[1], Data[2], dxl);
+      communication::setTorque(Data[1], Value, dxl);
     }
 
   else if(Data[0] == 11)
@@ -111,7 +118,7 @@ void loop()
      }
     else if(Data[0] == 13)
     {
-      communication::setPosition(Data[1], Data[2], dxl);
+      communication::setPosition(Data[1], Value, dxl);
   }
 
     else if(Data[0] == 14) 

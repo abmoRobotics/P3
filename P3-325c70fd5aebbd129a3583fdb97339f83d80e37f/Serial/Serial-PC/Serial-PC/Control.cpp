@@ -1,14 +1,16 @@
 #include "Control.h"
 #include <iostream>
+#include <string.h>
+#include <sstream>
 
 double getTorque()
 {
-
+	
 	return 0;
 }
 
 
-void Control::setTorque(double goalTorque, char Data[3], int motorID)
+void Control::setTorque(double goalTorque, char Data[256], int motorID)
 {
 	Data[0] = 10;
 	Data[1] = motorID;
@@ -16,7 +18,7 @@ void Control::setTorque(double goalTorque, char Data[3], int motorID)
  	SP->WriteData(Data, sizeof(Data));
 }; // Måske ikke lav
 
-double Control::getPosition(int motorID, char Data[3])
+double Control::getPosition(int motorID, char Data[256])
 {
 	Data[0] = 12;
 	Data[1] = motorID;
@@ -25,8 +27,8 @@ double Control::getPosition(int motorID, char Data[3])
 	char incomingData[256] = "";		// don't forget to pre-allocate memory
 	int dataLength = 255;
 	int readResult = 0;
-
-
+	
+	
 	SP->WriteData(Data, sizeof(Data));
 
 	bool waitForRead = TRUE;
@@ -37,19 +39,27 @@ double Control::getPosition(int motorID, char Data[3])
 	incomingData[readResult] = 0;
 	int ai{};
 	sscanf_s(incomingData, "%d", &ai);
-	std::cout << ai << std::endl;
 	
 	
 	return ai;
 }; // Position in radians
-void Control::setPosition(double goalPos, char Data[3], int motorID)
+void Control::setPosition(double goalPos, char Data[256], int motorID)
 {
-	Data[0] = 'D';
+	std::ostringstream sstream;
+	sstream << goalPos;
+	std::string varAsString = sstream.str();
+	Data[0] = 13;
 	Data[1] = motorID;
-	Data[2] = goalPos;
+	std::cout << varAsString << std::endl;
+	for (size_t i = 2; i < sizeof(Data); i++)
+	{
+		Data[i] = varAsString[i];
+	}
+	
+	std::cout << Data << std::endl;
 	SP->WriteData(Data, sizeof(Data));
 }; // Måske ikke lav
-double Control::getVelocity(int motorID, char Data[3])
+double Control::getVelocity(int motorID, char Data[256])
 {
 	Data[0] = 14;
 	Data[1] = motorID;
@@ -69,10 +79,11 @@ double Control::getVelocity(int motorID, char Data[3])
 	printf("%c", incomingData[0]);
 	return incomingData[0];
 };
-void Control::setVelocity(double goalVel, char Data[3], int motorID)
+void Control::setVelocity(double goalVel, char Data[256], int motorID)
 {
 	Data[0] = 13;
 	Data[1] = motorID;
+	
 	Data[2] = goalVel;
 	SP->WriteData(Data, sizeof(Data));
 };
