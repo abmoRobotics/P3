@@ -1,6 +1,7 @@
 ﻿  Control.cpp
 C:\Users\Jacob Knudsen\Google Drev\Crustcrawler\Projekt\Dynamixel\P3\P3-325c70fd5aebbd129a3583fdb97339f83d80e37f\Serial\Serial-PC\Serial-PC\Control.cpp(15,12): warning C4244: '=': conversion from 'double' to 'char', possible loss of data
-C:\Users\Jacob Knudsen\Google Drev\Crustcrawler\Projekt\Dynamixel\P3\P3-325c70fd5aebbd129a3583fdb97339f83d80e37f\Serial\Serial-PC\Serial-PC\Control.cpp(37,9): warning C4477: 'printf' : format string '%c' requires an argument of type 'int', but variadic argument 1 has type 'char *'
-C:\Users\Jacob Knudsen\Google Drev\Crustcrawler\Projekt\Dynamixel\P3\P3-325c70fd5aebbd129a3583fdb97339f83d80e37f\Serial\Serial-PC\Serial-PC\Control.cpp(44,12): warning C4244: '=': conversion from 'double' to 'char', possible loss of data
-C:\Users\Jacob Knudsen\Google Drev\Crustcrawler\Projekt\Dynamixel\P3\P3-325c70fd5aebbd129a3583fdb97339f83d80e37f\Serial\Serial-PC\Serial-PC\Control.cpp(71,12): warning C4244: '=': conversion from 'double' to 'char', possible loss of data
+C:\Users\Jacob Knudsen\Google Drev\Crustcrawler\Projekt\Dynamixel\P3\P3-325c70fd5aebbd129a3583fdb97339f83d80e37f\Serial\Serial-PC\Serial-PC\Control.cpp(49,12): warning C4244: '=': conversion from 'double' to 'char', possible loss of data
+C:\Users\Jacob Knudsen\Google Drev\Crustcrawler\Projekt\Dynamixel\P3\P3-325c70fd5aebbd129a3583fdb97339f83d80e37f\Serial\Serial-PC\Serial-PC\Control.cpp(76,12): warning C4244: '=': conversion from 'double' to 'char', possible loss of data
+  Serial-PC.cpp
+  Generating Code...
   Serial-PC.vcxproj -> C:\Users\Jacob Knudsen\Google Drev\Crustcrawler\Projekt\Dynamixel\P3\P3-325c70fd5aebbd129a3583fdb97339f83d80e37f\Serial\Serial-PC\Debug\Serial-PC.exe

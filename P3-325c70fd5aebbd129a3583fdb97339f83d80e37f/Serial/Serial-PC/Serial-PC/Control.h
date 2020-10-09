@@ -17,7 +17,7 @@ public:
     bool isConnected() { return SP->IsConnected(); };
 
     
-    char Data[3] = {1, 1, 0};
+    char Data[3] = {1, 1, 1};// {kommando, motorid, værdi}
 };
 
 

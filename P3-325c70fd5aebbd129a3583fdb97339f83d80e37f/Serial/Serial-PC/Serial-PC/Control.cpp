@@ -1,5 +1,5 @@
 #include "Control.h"
-
+#include <iostream>
 
 double getTorque()
 {
@@ -30,16 +30,21 @@ double Control::getPosition(int motorID, char Data[3])
 	SP->WriteData(Data, sizeof(Data));
 
 	bool waitForRead = TRUE;
+	int i{};
 	while (readResult == 0) {
-		readResult = SP->ReadData(incomingData, dataLength);
+		readResult = SP->ReadData(incomingData, dataLength);	
 	}
-	int ia = (int)incomingData[0];
-	printf("%c", incomingData);
-	return ia;
+	incomingData[readResult] = 0;
+	int ai{};
+	sscanf_s(incomingData, "%d", &ai);
+	std::cout << ai << std::endl;
+	
+	
+	return ai;
 }; // Position in radians
 void Control::setPosition(double goalPos, char Data[3], int motorID)
 {
-	Data[0] = 13;
+	Data[0] = 'D';
 	Data[1] = motorID;
 	Data[2] = goalPos;
 	SP->WriteData(Data, sizeof(Data));

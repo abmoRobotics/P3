@@ -88,44 +88,49 @@ void loop()
   lcd.print(Data[1]);
   lcd.setCursor(9,0);
   lcd.print(Data[2]);
-
+  String test = communication::getPosition(Data[1], dxl);
   if (useData == true)
   {
-    switch (Data[0])
+    if (Data[0] == 10)
     {
-    case 10:
       communication::setTorque(Data[1], Data[2], dxl);
-    break;
+    }
 
-    case 11:
+  else if(Data[0] == 11)
+  {
       communication::getTorque(Data[1], dxl);
-      break;
+  }
     
-    case 12:
-      int test = communication::getPosition(Data[1], dxl);
-      Serial.write((int)communication::getPosition(Data[1], dxl));
-      lcd.setCursor(0,1);
-      lcd.print(test);
-    break;
-
-    case 13:
+  else if(Data[0] == 12)
+  {    
+      for (size_t i = 0; i < test.length(); i++)
+      {
+        Serial.write(test[i]);
+      }
+    
+     }
+    else if(Data[0] == 13)
+    {
       communication::setPosition(Data[1], Data[2], dxl);
-    break;
+  }
 
-    case 14: 
+    else if(Data[0] == 14) 
+    {
     communication::getVelocity(Data[1], dxl);
-    break;
+    }
 
-    case 15:
+    else if(Data[0] == 15)
+    {
     communication::setVelocity(Data[1], Data[2], dxl);
-    break;
+    }
     
-    default:
+    else
+    {
+    
       digitalWrite(13, HIGH);
       delay(500);
       digitalWrite(13, LOW);
       delay(500);
-      break;
     }
     useData = false;
   }
