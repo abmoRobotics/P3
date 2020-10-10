@@ -1,0 +1,4 @@
+﻿  Control.cpp
+C:\Users\anton\Dropbox\DEV\P3\P3-325c70fd5aebbd129a3583fdb97339f83d80e37f\Serial\Serial-PC\Serial-PC\Control.cpp(18,12): warning C4244: '=': conversion from 'double' to 'char', possible loss of data
+C:\Users\anton\Dropbox\DEV\P3\P3-325c70fd5aebbd129a3583fdb97339f83d80e37f\Serial\Serial-PC\Serial-PC\Control.cpp(88,12): warning C4244: '=': conversion from 'double' to 'char', possible loss of data
+  Serial-PC.vcxproj -> C:\Users\anton\Dropbox\DEV\P3\P3-325c70fd5aebbd129a3583fdb97339f83d80e37f\Serial\Serial-PC\x64\Debug\Serial-PC.exe

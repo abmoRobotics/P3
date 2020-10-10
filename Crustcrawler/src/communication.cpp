@@ -11,11 +11,11 @@
     void communication::setTorque(int motorID, int goalTorque, Dynamixel2Arduino dxl) {
         dxl.setGoalCurrent(motorID, goalTorque);
     } // Måske ikke lav
-    String communication::getPosition(int motorID, Dynamixel2Arduino dxl) {
-        int measuredPos = dxl.getPresentPosition(motorID);
+    int16_t communication::getPosition(int motorID, Dynamixel2Arduino dxl) {
+        int16_t measuredPos = dxl.getPresentPosition(motorID);
         double radianPos = ((2*PI/4095)*measuredPos);
-        String stringPos = (String)measuredPos;
-        return stringPos;
+        //String stringPos = (String)measuredPos;
+        return measuredPos;
     } // Position in radians
 
     void communication::setPosition(int motorID, int goalPos, Dynamixel2Arduino dxl) {

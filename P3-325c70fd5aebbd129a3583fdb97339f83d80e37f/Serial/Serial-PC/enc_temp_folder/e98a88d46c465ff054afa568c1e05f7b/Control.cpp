@@ -16,18 +16,16 @@ void Control::setTorque(double goalTorque, char Data[256], int motorID)
 	Data[0] = 10;
 	Data[1] = motorID;
 	Data[2] = goalTorque;
-
  	SP->WriteData(Data, sizeof(Data));
 }; // Måske ikke lav
 
-int16_t Control::getPosition(int motorID, char Data[256])
+double Control::getPosition(int motorID, char Data[256])
 {
 	Data[0] = 12;
 	Data[1] = motorID;
 	Data[2] = NULL;
-	Data[3] = NULL;
 
-	char incomingData[256] = "";		// don't forget to pre-allocate memory
+	char incomingData[1024] = "";		// don't forget to pre-allocate memory
 	int dataLength = 255;
 	int readResult = 0;
 	
@@ -38,29 +36,26 @@ int16_t Control::getPosition(int motorID, char Data[256])
 	while (readResult == 0) {
 		readResult = SP->ReadData(incomingData, dataLength);
 	}
-
-	int16_t firstByte = incomingData[0];
-	int16_t secondByte = (incomingData[1] << 8);	// Shift data 8 bits to the left. 
-	int16_t position = firstByte + secondByte;		// Add the value of the two bytes
+	int16_t a = incomingData[0];
+	int16_t b = (incomingData[1] << 8);
+	int16_t c = a + b;
 
 	std::cout << ((incomingData[1] << 8) + incomingData[0]) << std::endl;
 	
 	return 1.0;
 }; // Position in radians
-void Control::setPosition(int16_t goalPos, char Data[256], int motorID)
+void Control::setPosition(double goalPos, char Data[256], int motorID)
 {
 	std::ostringstream sstream;
 	sstream << goalPos;
 	std::string varAsString = sstream.str();
 	Data[0] = 13;
 	Data[1] = motorID;
-	Data[2] = (byte)goalPos;
-	Data[3] = (byte)(goalPos >> 8);
-	//std::cout << varAsString << std::endl;
-	//for (size_t i = 2; i < sizeof(Data); i++)
-	//{
-	//	Data[i] = varAsString[i];
-	//}
+	std::cout << varAsString << std::endl;
+	for (size_t i = 2; i < sizeof(Data); i++)
+	{
+		Data[i] = varAsString[i];
+	}
 	
 	std::cout << Data << std::endl;
 	SP->WriteData(Data, sizeof(Data));
@@ -70,7 +65,7 @@ double Control::getVelocity(int motorID, char Data[256])
 	Data[0] = 14;
 	Data[1] = motorID;
 	Data[2] = NULL;
-	Data[3] = NULL;
+
 	char incomingData[256] = "";			// don't forget to pre-allocate memory
 	int dataLength = 255;
 	int readResult = 0;

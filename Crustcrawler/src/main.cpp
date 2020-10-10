@@ -73,21 +73,25 @@ void loop()
 {
 
   bool useData = false;
-  int Data[256];
-  char valueA[256];
+  int Data[256];    //OBS: ændret fra int; First byte = command, second byte = motor id, third and fourth byte = value(int16_t)
+  //char valueA[256];
   int i = 0;
   while (Serial.available() > 0)
   {
     Data[i] = Serial.read();
-    if(i > 1)
-    {
-      valueA[i] = Data[i];
-    }
+    //if(i > 1)
+    //{
+    //  valueA[i] = Data[i];
+    //}
     i++;
     useData = true;
   }
-  int Value{};
-  Value = atoi(valueA);
+  uint8_t command = Data[0];
+  uint8_t motorID = Data[1];
+  uint16_t Value = Data[2] + (Data[3] << 8);
+  
+  //int Value{};
+  //Value = atoi(valueA);
   lcd.clear();
   lcd.setCursor(0,0);
   lcd.print(Data[0]);
@@ -95,40 +99,43 @@ void loop()
   lcd.print(Data[1]);
   lcd.setCursor(9,0);
   lcd.print(Value);
-  String test = communication::getPosition(Data[1], dxl);
+ 
   if (useData == true)
   {
-    if (Data[0] == 10)
+    if (command == commandList::setTorque)
     {
-      communication::setTorque(Data[1], Value, dxl);
+      communication::setTorque(motorID, Value, dxl);
     }
 
-  else if(Data[0] == 11)
+  else if(command == commandList::getTorque)
   {
-      communication::getTorque(Data[1], dxl);
+      communication::getTorque(motorID, dxl);
   }
     
-  else if(Data[0] == 12)
+  else if(command == commandList::getPosition)
   {    
-      for (size_t i = 0; i < test.length(); i++)
-      {
-        Serial.write(test[i]);
-      }
+    
+    	int16_t pos = communication::getPosition(motorID,dxl);
+
+      char firstByte = (byte)pos;         //
+      char secondByte = (byte)(pos >> 8); // Shift 8 bit to left
+      Serial.write(firstByte);            // Write first byte representing a number from 0-255
+      Serial.write(secondByte);           // Write second byte representing a number from 256 til noget stort(ca 32000)
     
      }
-    else if(Data[0] == 13)
+    else if(command == commandList::setPosition)
     {
-      communication::setPosition(Data[1], Value, dxl);
+      communication::setPosition(motorID, Value, dxl);
   }
 
-    else if(Data[0] == 14) 
+    else if(command == commandList::getVelocity) 
     {
-    communication::getVelocity(Data[1], dxl);
+    communication::getVelocity(motorID, dxl);
     }
 
-    else if(Data[0] == 15)
+    else if(command == commandList::setVelocity)
     {
-    communication::setVelocity(Data[1], Data[2], dxl);
+    communication::setVelocity(motorID, Value, dxl);
     }
     
     else

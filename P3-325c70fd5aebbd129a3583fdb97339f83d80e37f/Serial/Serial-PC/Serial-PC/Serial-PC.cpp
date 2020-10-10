@@ -22,14 +22,16 @@ int _tmain(int argc, _TCHAR* argv[])
 	//while (Test.isConnected())
 	//{
 
-		
-
+	//int16_t a = (secondByte << 8) + firstByte;
+	int16_t ke = -2206;
 		
 	//}
-	Test.setPosition(Test.getPosition(1, Test.Data) + 100, Test.Data, 1);
+	//Test.setPosition(Test.getPosition(1, Test.Data) + 100, Test.Data, 1);
+	//Test.setPosition(1,Test.Data,1);
+	Test.getPosition(1, Test.Data);
 	Sleep(2000);
-	Test.setPosition(Test.getPosition(2, Test.Data) + 100, Test.Data, 2);
-	Sleep(2000);
+	//Test.setPosition(Test.getPosition(2, Test.Data) + 100, Test.Data, 2);
+	//Sleep(2000);
 
 	return 0;
 }
