@@ -15,7 +15,7 @@ public:
     void startMotors();
     double getTorque(int motorID);
     void setTorque(int motorID, int goalTorque); // Måske ikke lav
-    void getPosition(int motorID);             // Position in radians
+    float getPosition(int motorID);             // Position in radians
     void setPosition(int motorID, int16_t goalPos);  // Måske ikke lav
     double getVelocity(int motorID);
     void setVelocity(int motorID, int goalVel);

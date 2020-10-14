@@ -8,6 +8,7 @@ robotArm::robotArm(Dynamixel2Arduino &dxl2){
     startMotors();
 }
 
+//kigges på senere af Emil og Anton
 double robotArm::getTorque(int motorID)
 {
     double measuredTorque = dxl->getPresentCurrent(motorID);
@@ -19,17 +20,16 @@ void robotArm::setTorque(int motorID, int goalTorque)
     dxl->setGoalCurrent(motorID, goalTorque);
 } // Måske ikke lav
 
-void robotArm::getPosition(int motorID)
+float robotArm::getPosition(int motorID)
 {
     int16_t measuredPos = dxl->getPresentPosition(motorID);
-    double radianPos = ((2 * PI / 4095) * measuredPos);
+    float radianPos = ((2 * PI / 4095) * measuredPos);
     char firstByte = (byte)measuredPos;         //
     char secondByte = (byte)(measuredPos >> 8); // Shift 8 bit to left
     Serial.write(firstByte);                    // Write first byte representing a number from 0-255
     Serial.write(secondByte);                   // Write second byte representing a number from 256 til noget stort(ca 32000)
-
+    return radianPos;
 } // Position in radians
- // Position in radians
 
 void robotArm::setPosition(int motorID, int16_t goalPos)
 {
@@ -48,5 +48,10 @@ void robotArm::setVelocity(int motorID, int goalVel)
 }
 
 void robotArm::startMotors(){
-
+for (size_t i = 1; i < 7; i++)
+  {
+    dxl->torqueOff(i);
+    dxl->setOperatingMode(i, OP_POSITION);
+    dxl->torqueOn(i);
+  }
 }

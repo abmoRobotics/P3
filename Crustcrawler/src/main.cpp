@@ -34,12 +34,7 @@ void setup()
   
 
 //eventuelt lav en funktion til dette
-  // for (size_t i = 1; i < 7; i++)
-  // {
-  //   dxl.torqueOff(i);
-  //   dxl.setOperatingMode(i, OP_POSITION);
-  //   dxl.torqueOn(i);
-  // }
+  
 
 
 
@@ -48,15 +43,9 @@ void setup()
 }
 
 
-// void blinkLED(int Pin, int time)
-// {
-//   digitalWrite(Pin, HIGH);
-//   delay(time);
-//   digitalWrite(Pin, LOW);
-//   delay(time);
-// }
-
 Dynamixel2Arduino dxl(DXL_SERIAL, 2);
+robotArm robot(dxl);
+
 void loop()
 {
 
@@ -76,7 +65,7 @@ void loop()
   uint16_t Value = Data[2] + (Data[3] << 8);
   
   
-  robotArm robot(dxl);
+  
 
   if (useData == true){
     if(command == commandList::setPosition)
