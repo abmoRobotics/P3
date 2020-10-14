@@ -1,4 +1,2 @@
-﻿  Control.cpp
-C:\Users\Jacob Knudsen\Google Drev\Crustcrawler\Projekt\Dynamixel\P3\P3-325c70fd5aebbd129a3583fdb97339f83d80e37f\Serial\Serial-PC\Serial-PC\Control.cpp(17,12): warning C4244: '=': conversion from 'double' to 'char', possible loss of data
-C:\Users\Jacob Knudsen\Google Drev\Crustcrawler\Projekt\Dynamixel\P3\P3-325c70fd5aebbd129a3583fdb97339f83d80e37f\Serial\Serial-PC\Serial-PC\Control.cpp(87,12): warning C4244: '=': conversion from 'double' to 'char', possible loss of data
+﻿  Serial-PC.cpp
   Serial-PC.vcxproj -> C:\Users\Jacob Knudsen\Google Drev\Crustcrawler\Projekt\Dynamixel\P3\P3-325c70fd5aebbd129a3583fdb97339f83d80e37f\Serial\Serial-PC\Debug\Serial-PC.exe

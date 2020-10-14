@@ -24,11 +24,15 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	//int16_t a = (secondByte << 8) + firstByte;
 	int16_t ke = -2206;
+	char a = (char)ke;
+	char b = (char)(ke >> 8);
+
+	int16_t c = (int16_t)a + (int16_t)(b << 8);
 		
 	//}
-	//Test.setPosition(Test.getPosition(1, Test.Data) + 100, Test.Data, 1);
+	Test.setPosition(Test.getPosition(1, Test.Data) - 100, Test.Data, 1);
 	//Test.setPosition(1,Test.Data,1);
-	Test.getPosition(1, Test.Data);
+	//Test.getPosition(1, Test.Data);
 	Sleep(2000);
 	//Test.setPosition(Test.getPosition(2, Test.Data) + 100, Test.Data, 2);
 	//Sleep(2000);

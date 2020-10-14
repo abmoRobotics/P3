@@ -5,7 +5,7 @@
 class Control
 {
 public:
-    Serial* SP = new Serial("\\\\.\\COM12");    // adjust as needed
+    Serial* SP = new Serial("COM7");    // adjust as needed
     double getTorque() {};
     void setTorque(double goalTorque, char Data[256], int motorID); // Måske ikke lav
     int16_t getPosition(int motorID, char Data[256]); // Position in radians

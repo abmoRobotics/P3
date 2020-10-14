@@ -45,7 +45,7 @@ int16_t Control::getPosition(int motorID, char Data[256])
 
 	std::cout << ((incomingData[1] << 8) + incomingData[0]) << std::endl;
 	
-	return 1.0;
+	return position;
 }; // Position in radians
 void Control::setPosition(int16_t goalPos, char Data[256], int motorID)
 {
@@ -56,13 +56,9 @@ void Control::setPosition(int16_t goalPos, char Data[256], int motorID)
 	Data[1] = motorID;
 	Data[2] = (byte)goalPos;
 	Data[3] = (byte)(goalPos >> 8);
-	//std::cout << varAsString << std::endl;
-	//for (size_t i = 2; i < sizeof(Data); i++)
-	//{
-	//	Data[i] = varAsString[i];
-	//}
 	
-	std::cout << Data << std::endl;
+	
+	//std::cout << Data << std::endl;
 	SP->WriteData(Data, sizeof(Data));
 }; // Måske ikke lav
 double Control::getVelocity(int motorID, char Data[256])
