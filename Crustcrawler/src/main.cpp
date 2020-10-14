@@ -1,38 +1,25 @@
 #include <string.h>
-#include "communication.h"
 #include <Wire.h>
+#include "robotArm.h"
 
 // #include <LiquidCrystal_I2C.h>
-
-// LiquidCrystal_I2C lcd(0x27,20,4);
-
-
-
-
-// const uint8_t Elbow = 1;
-// const uint8_t Forearm = 2;
-// const uint8_t Hand_vert = 3;
-// const uint8_t Hand_hori = 4;
-// const uint8_t GripperR = 5;
-// const uint8_t GripperL = 6;
-
 
 
 // const int redLED = 7;
 // const int yellowLED = 6;
 // const int greenLED = 5;
 
+const uint8_t DXL_DIR_PIN = 2;
+    
 
-const float DXL_PROTOCOL_VERSION = 2.0;
 
 
 
 //This namespace is required to use Control table item names
 
 
-#define DXL_SERIAL Serial1
-const uint8_t DXL_DIR_PIN = 2;
-Dynamixel2Arduino dxl(DXL_SERIAL, DXL_DIR_PIN);
+
+
 
 void setup()
 {
@@ -44,16 +31,15 @@ void setup()
   // Use UART port of DYNAMIXEL Shield to debug.
   Serial.begin(115200);
 
-  dxl.begin(57600);
-  dxl.setPortProtocolVersion(DXL_PROTOCOL_VERSION);
+  
 
 //eventuelt lav en funktion til dette
-  for (size_t i = 1; i < 7; i++)
-  {
-    dxl.torqueOff(i);
-    dxl.setOperatingMode(i, OP_POSITION);
-    dxl.torqueOn(i);
-  }
+  // for (size_t i = 1; i < 7; i++)
+  // {
+  //   dxl.torqueOff(i);
+  //   dxl.setOperatingMode(i, OP_POSITION);
+  //   dxl.torqueOn(i);
+  // }
 
 
 
@@ -70,7 +56,7 @@ void setup()
 //   delay(time);
 // }
 
-
+Dynamixel2Arduino dxl(DXL_SERIAL, 2);
 void loop()
 {
 
@@ -89,50 +75,67 @@ void loop()
   uint8_t motorID = Data[1];
   uint16_t Value = Data[2] + (Data[3] << 8);
   
- 
-  if (useData == true)
-  {
-    if (command == 10)
+  
+  robotArm robot(dxl);
+
+  if (useData == true){
+    if(command == commandList::setPosition)
     {
-      communication::setTorque(motorID, Value, dxl);
+      robot.setPosition(motorID, Value);
+  }
+
+    else if(command == commandList::getPosition) 
+    {
+    robot.getPosition(motorID);
     }
 
-  else if(command == commandList::getTorque)
-  {
-      communication::getTorque(motorID, dxl);
+    delay(1000);
   }
+
+ 
+  // if (useData == true)
+  // {
+  //   if (command == 10)
+  //   {
+  //     communication::setTorque(motorID, Value, dxl);
+  //   }
+
+  // else if(command == commandList::getTorque)
+  // {
+  //     communication::getTorque(motorID, dxl);
+  // }
     
-  else if(command == commandList::getPosition)
-  {    
+  // else if(command == commandList::getPosition)
+  // {    
     
-    	communication::getPosition(motorID,dxl);
+  //   	communication::getPosition(motorID,dxl);
 
       
-     }
-    else if(command == commandList::setPosition)
-    {
-      communication::setPosition(motorID, Value, dxl);
-  }
+  //    }
+  //   else if(command == commandList::setPosition)
+  //   {
+  //     communication::setPosition(motorID, Value, dxl);
+  // }
 
-    else if(command == commandList::getVelocity) 
-    {
-    communication::getVelocity(motorID, dxl);
-    }
+  //   else if(command == commandList::getVelocity) 
+  //   {
+  //   communication::getVelocity(motorID, dxl);
+  //   }
 
-    else if(command == commandList::setVelocity)
-    {
-    communication::setVelocity(motorID, Value, dxl);
-    }
+  //   else if(command == commandList::setVelocity)
+  //   {
+  //   communication::setVelocity(motorID, Value, dxl);
+  //   }f
    
-    else
-    {
+  //   else
+  //   {
     
-      digitalWrite(13, HIGH);
-      delay(500);
-      digitalWrite(13, LOW);
-      delay(500);
-    }
-    useData = false;
-  }
+  //     digitalWrite(13, HIGH);
+  //     delay(500);
+  //     digitalWrite(13, LOW);
+  //     delay(500);
+  //   }
+  //   useData = false;
+  // }
   delay(1000);
 }
