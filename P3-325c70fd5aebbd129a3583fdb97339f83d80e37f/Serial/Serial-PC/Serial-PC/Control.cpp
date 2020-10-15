@@ -1,4 +1,4 @@
-#include "Control.h"
+#include "control.h"
 #include <iostream>
 #include <string.h>
 #include <sstream>
@@ -11,7 +11,7 @@ double getTorque()
 }
 
 
-void Control::setTorque(double goalTorque, char Data[256], int motorID)
+void arduinoCOM::setTorque(double goalTorque, char Data[256], int motorID)
 {
 	Data[0] = 10;
 	Data[1] = motorID;
@@ -20,7 +20,7 @@ void Control::setTorque(double goalTorque, char Data[256], int motorID)
  	SP->WriteData(Data, sizeof(Data));
 }; // Måske ikke lav
 
-int16_t Control::getPosition(int motorID, char Data[256])
+int16_t arduinoCOM::getPosition(int motorID, char Data[256])
 {
 	Data[0] = 12;
 	Data[1] = motorID;
@@ -47,7 +47,7 @@ int16_t Control::getPosition(int motorID, char Data[256])
 	
 	return position;
 }; // Position in radians
-void Control::setPosition(int16_t goalPos, char Data[256], int motorID)
+void arduinoCOM::setPosition(int16_t goalPos, char Data[256], int motorID)
 {
 	std::ostringstream sstream;
 	sstream << goalPos;
@@ -61,7 +61,7 @@ void Control::setPosition(int16_t goalPos, char Data[256], int motorID)
 	//std::cout << Data << std::endl;
 	SP->WriteData(Data, sizeof(Data));
 }; // Måske ikke lav
-double Control::getVelocity(int motorID, char Data[256])
+double arduinoCOM::getVelocity(int motorID, char Data[256])
 {
 	Data[0] = 14;
 	Data[1] = motorID;
@@ -81,7 +81,7 @@ double Control::getVelocity(int motorID, char Data[256])
 	printf("%c", incomingData[0]);
 	return incomingData[0];
 };
-void Control::setVelocity(double goalVel, char Data[256], int motorID)
+void arduinoCOM::setVelocity(double goalVel, char Data[256], int motorID)
 {
 	Data[0] = 13;
 	Data[1] = motorID;

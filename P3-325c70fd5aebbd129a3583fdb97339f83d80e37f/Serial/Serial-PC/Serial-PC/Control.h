@@ -2,7 +2,7 @@
 #include "SerialClass.h"
 #include <vector>
 
-class Control
+class arduinoCOM
 {
 public:
     Serial* SP = new Serial("COM7");    // adjust as needed
