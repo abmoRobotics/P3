@@ -48,8 +48,29 @@ void loop()
     robot.getPosition(motorID);
     }
 
-    delay(1000);
+    else if(command == commandList::getVelocity) 
+    {
+      robot.getVelocity(motorID);
+    }
+
+    else if(command == commandList::setVelocity)
+    {
+      robot.setVelocity(motorID, Value); //i tvivl om vi skal bruge Value som variable. 
+      //men vi sender vel kun en værdi, enten position, torque eller velocity, right?
+    }
+
+    else if (command == commandList::getTorque)
+    {
+      robot.getTorque(motorID);
+    }
+    
+    else if (command == commandList::setTorque)
+    {
+      robot.setTorque(motorID, Value);
+    }
+    
   }
+     delay(1000);
 
  
   // if (useData == true)
@@ -96,5 +117,5 @@ void loop()
   //   }
   //   useData = false;
   // }
-  delay(1000);
+
 }
