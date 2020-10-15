@@ -2,44 +2,14 @@
 #include <Wire.h>
 #include "robotArm.h"
 
-// #include <LiquidCrystal_I2C.h>
-
-
-// const int redLED = 7;
-// const int yellowLED = 6;
-// const int greenLED = 5;
-
 const uint8_t DXL_DIR_PIN = 2;
     
-
-
-
-
-//This namespace is required to use Control table item names
-
-
-
-
-
 void setup()
 {
   // put your setup code here, to run once:
   pinMode(LED_BUILTIN, OUTPUT);
-  // pinMode(5, OUTPUT);
-  // pinMode(6, OUTPUT);
-  // pinMode(7, OUTPUT);
-  // Use UART port of DYNAMIXEL Shield to debug.
+ 
   Serial.begin(115200);
-
-  
-
-//eventuelt lav en funktion til dette
-  
-
-
-
-  // lcd.init();                      // initialize the lcd 
-  // lcd.backlight();
 }
 
 
