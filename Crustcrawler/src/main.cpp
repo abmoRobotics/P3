@@ -55,7 +55,7 @@ void loop()
 
     else if(command == commandList::setVelocity)
     {
-      robot.setVelocity(motorID, Value); //i tvivl om vi skal bruge Value som variable. 
+      robot.setVelocity(motorID, Value); //i tvivl om vi skaljghg bruge Value som variable. 
       //men vi sender vel kun en værdi, enten position, torque eller velocity, right?
     }
 
