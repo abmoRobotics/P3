@@ -1,20 +1,7 @@
 #include "DataCollector.h"
-#include "Control.h"
 #include <math.h>
 
-arduinoCOM Arduino;
-//Funktionen kører hele tiden og tjekker om man dobbeltapper (Funktionen bliver kaldt i main og startes i et nyt multithread)
-void DataCollector::fistModeTimer() {
-	while (true) {
-		Sleep(10);
-		if (fistModeOn) { //Når man har dobbeltappet
-			Sleep(5000);
-			fistModeOn = false;
-			std::cout << "LOCKED" << std::endl;
-			PlaySound(TEXT("targetLocked.wav"), NULL, SND_SYNC);
-		}
-	}
-}
+
 
 //Funktionen kaldes når vi modtager et nyt pose fra myo
 void DataCollector::onPose(myo::Myo* myo, uint64_t timestamp, myo::Pose pose) {
@@ -32,6 +19,19 @@ void DataCollector::onPose(myo::Myo* myo, uint64_t timestamp, myo::Pose pose) {
 		}
 	}
 
+}
+
+//Funktionen kører hele tiden og tjekker om man dobbeltapper (Funktionen bliver kaldt i main og startes i et nyt multithread)
+void DataCollector::fistModeTimer() {
+	while (true) {
+		Sleep(10);
+		if (fistModeOn) { //Når man har dobbeltappet
+			Sleep(5000);
+			fistModeOn = false;
+			std::cout << "LOCKED" << std::endl;
+			PlaySound(TEXT("targetLocked.wav"), NULL, SND_SYNC);
+		}
+	}
 }
 
 //Get rawEmg data and put it in a matrix
@@ -63,10 +63,12 @@ void DataCollector::CalculateAverage() {
 	}
 
 	//Print rå data
-	/*for (int i = 0; i < 8; i++) {
-		std::cout << "[" << average[i] << "]";
+	if (showRawEmg) {
+		for (int i = 0; i < 8; i++) {
+			std::cout << "[" << average[i] << "]";
+		}
+		std::cout << " " << std::endl;
 	}
-	std::cout << " " << std::endl;*/
 
 	//Gennemsnittet bruges til hver bevælgelse
 	fistAvg = average[0] + average[3] + average[4] + average[5] + average[6] + average[7];
@@ -154,44 +156,21 @@ void DataCollector::onEmgData(myo::Myo* myo, uint64_t timestamp, const int8_t* e
 	myoData[4] = (int)procent;
 
 	//Print myoData i konsol
-	if (finishedSetup) {
+	if (finishedSetup && showMyoData)
 		std::cout << "[" << myoData[0] << "," << myoData[1] << "," << myoData[2] << "," << myoData[3] << "," << myoData[4] << "," << myoData[5] << "," << myoData[6] << "," << myoData[7] << "]" << std::endl;
-	
-	}
+	else if (finishedSetup && showPose)
+		std::cout << "[" << myoData[0] << "," << myoData[1] << "," << myoData[2] << "," << myoData[3] << "," << myoData[4] << "]" << std::endl;
 
-	//send data til arduino
-
-
-	//Counter for emgData stiger
+	//Counteren for emgData stiger
 	counter++;
 }
 
 
-void DataCollector::sendOrientationToArduino()
-{
-
-	int nullmotor1{ 1250 };
-	int fullmotor1{ 2300 };
-	int middlemotor1 = (fullmotor1 - nullmotor1) / 2 + nullmotor1;
-	int fullmotor1Deg = 90;
-
-	int nullmotor2{1350};
-	int fullmotor2{2750};
-	int middlemotor2 = (fullmotor2 - nullmotor2) / 2 + nullmotor2;
-	int fullmotor2Deg = 100;
-
-	int16_t goalPosPitch = (fullmotor1 - middlemotor1) / (fullmotor1Deg) * myoData[6] + middlemotor1;
-	int16_t goalPosRoll = (fullmotor2 - middlemotor2) / (fullmotor2Deg) * myoData[5] + middlemotor2;
-
-	//int16_t goalPosRoll = (4096 / 360) * myoData[5] + nullmotor2;
-	Arduino.setPosition(goalPosPitch, 1);
-	Arduino.setPosition(goalPosRoll, 2);
-
-	
-}
-
-
-
+using std::atan2;
+using std::asin;
+using std::sqrt;
+using std::max;
+using std::min;
 //Funktionen kaldes når et nyt orientation er givet fra myoband
 void DataCollector::onOrientationData(myo::Myo* myo, uint64_t timestap, const myo::Quaternion<float>& rotation) {
 
@@ -200,11 +179,7 @@ void DataCollector::onOrientationData(myo::Myo* myo, uint64_t timestap, const my
 	int newYaw = 0;
 
 	//Udregn euler angles(roll, pitch, yaw) udfra quaternion
-	using std::atan2;
-	using std::asin;
-	using std::sqrt;
-	using std::max;
-	using std::min;
+
 	float rollRad = atan2(2.0f * (rotation.w() * rotation.x() + rotation.y() * rotation.z()), //quik maffs
 		1.0f - 2.0f * (rotation.x() * rotation.x() + rotation.y() * rotation.y()));
 	float pitchRad = asin(max(-1.0f, min(1.0f, 2.0f * (rotation.w() * rotation.y() - rotation.z() * rotation.x()))));
@@ -212,9 +187,9 @@ void DataCollector::onOrientationData(myo::Myo* myo, uint64_t timestap, const my
 		1.0f - 2.0f * (rotation.y() * rotation.y() + rotation.z() * rotation.z()));
 
 	//Convert to degrees
-	roll = rollRad * 180 / M_PI;
-	pitch = pitchRad * 180 / M_PI;
-	yaw = yawRad * 180 / M_PI;
+	roll = (int)(rollRad * 180 / M_PI);
+	pitch = (int)(pitchRad * 180 / M_PI);
+	yaw = (int)(yawRad * 180 / M_PI);
 
 	//Udregn den kalibreret roll pitch yaw
 	newRoll = roll - startRoll;
@@ -226,15 +201,67 @@ void DataCollector::onOrientationData(myo::Myo* myo, uint64_t timestap, const my
 	myoData[6] = newPitch;
 	myoData[7] = newYaw;
 
+	if (showOrientation) {
+		std::cout << newRoll << "," << newPitch << "," << newYaw << std::endl;
+	}
+
 }
+
+//Sender data til arduino hele tiden 
+void DataCollector::ArduinoThread() {
+	while(1) {
+		if (finishedSetup) {
+			sendOrientationToArduino();	
+		}
+		Sleep(15);
+	}
+}
+
+//Sender orientationen til arduino
+void DataCollector::sendOrientationToArduino()
+{
+
+	int nullmotor1{ 1250 }; //Ticks når motoren er i nul position
+	int fullmotor1{ 2300 }; //Ticks når motoren er i maks position
+	int middlemotor1 = (fullmotor1 - nullmotor1) / 2 + nullmotor1; //Ticks når motoren er midtvejs
+	int fullmotor1Deg = 90; //Maks grader man kan bevæge armen
+
+	int nullmotor2{ 1350 }; //Ticks når motoren er i nul position
+	int fullmotor2{ 2750 }; //Ticks når motoren er i maks position
+	int middlemotor2 = (fullmotor2 - nullmotor2) / 2 + nullmotor2; //Ticks når motoren er midtvejs
+	int fullmotor2Deg = 100; //Maks grader man kan bevæge armen
+
+	int16_t goalPosPitch = (fullmotor1 - middlemotor1) / (fullmotor1Deg)*myoData[6] + middlemotor1; //ax+b funktion, udregner ticks ud fra pitch degrees
+	int16_t goalPosRoll = (fullmotor2 - middlemotor2) / (fullmotor2Deg)*myoData[5] + middlemotor2; //ax+b funktion, udregner ticks ud fra roll degrees
+
+	//Send ny position til arduinoen
+	Arduino.setPosition(goalPosPitch, 1);
+	Arduino.setPosition(goalPosRoll, 2);
+
+
+}
+
+//Start threads when constructed
+void DataCollector::startThreads() {
+	std::thread t(&DataCollector::setupMyo, this);
+	std::thread t2(&DataCollector::fistModeTimer, this);
+	std::thread t3(&DataCollector::ArduinoThread, this);
+	t2.join();
+}
+
 
 //Kalibrere setup (bliver kaldt af main funktionen når)
 void DataCollector::setupMyo() {
 
-	if (Arduino.isConnected())
+
+	if (!Arduino.isConnected())
 	{
-		printf("Arduino is connected");
+		std::cout << "Arduino is not connected" << std::endl;
+		Sleep(500);
 	}
+
+	std::cout << "Arduino is connected!" << std::endl;
+
 	std::cout << "Starting setup" << std::endl;
 
 	//Vent indtil gennemsnittet af hver pod kan blive udregnet
@@ -242,116 +269,141 @@ void DataCollector::setupMyo() {
 		Sleep(100);
 	}
 
-	std::cout << "Welcome to Myoband Calibration Setup" << std::endl;
-	system("pause");
-
 	/// 
-	/// UP POSE
-	/// 
-	/*
-	std::cout << "Perform Up pose" << std::endl;
-	Sleep(3000);
-
-	//press any key to resume
-	system("pause");
-
-	//Get up average
-	upThreshold = average[3] + average[4] + average[5];
-	std::cout << "Up: " << upThreshold << std::endl;
-
-	//Calculate threshold
-	upThreshold = upThreshold - 20;
-	std::cout << "Up threshold: " << upThreshold << std::endl;
-
-	Sleep(1000);
-
-	/// 
-	/// DOWN POSE
+	/// DEBUG
 	/// 
 
-	std::cout << "Perform Down pose" << std::endl;
-	Sleep(3000);
+	char input;
+	std::cout << "Show raw EMG data [y/n]" << std::endl; std::cin >> input;	
+	if (input == 'y') showRawEmg = true;
 
-	//press any key to resume
-	system("pause");
+	std::cout << "Show myoData [y/n]" << std::endl; std::cin >> input;
+	if (input == 'y') showMyoData = true;
 
-	//Get down average
-	downThreshold = average[0] + average[4] + average[6] + average[7];
-	std::cout << "Down: " << downThreshold << std::endl;
+	std::cout << "Show pose data [y/n]" << std::endl; std::cin >> input;
+	if (input == 'y') showPose = true;
 
-	//Calculate threshold
-	downThreshold = downThreshold - 20;
-	std::cout << "Down threshold: " << downThreshold << std::endl;
-	Sleep(1000);
+	std::cout << "Show orientation [y/n]" << std::endl; std::cin >> input;
+	if (input == 'y') showOrientation = true;
 
-	/// 
-	/// OUT POSE
-	/// 
+	//Skip setup
+	std::cout << "Skip calibration setup? [y/n]" << std::endl;
+	std::cin >> input;
 
-	std::cout << "Perform Out pose" << std::endl;
-	Sleep(3000);
+	if(input == 'n'){
 
-	//Press any key to resume
-	system("pause");
+		std::cout << "Welcome to Myoband Calibration Setup" << std::endl;
+		system("pause");
 
-	//Get out average
-	outThreshold = average[5] + average[6];
-	std::cout << "Out: " << outThreshold << std::endl;
+		/// 
+		/// UP POSE
+		/// 
 
-	//Calculate threshold
-	outThreshold = outThreshold - 12;
-	std::cout << "Out threshold: " << outThreshold << std::endl;
-	Sleep(1000);
+		std::cout << "Perform Up pose" << std::endl;
+		Sleep(3000);
 
-	/// 
-	/// IN POSE
-	/// 
+		//press any key to resume
+		system("pause");
 
-	std::cout << "Perform In pose" << std::endl;
-	Sleep(3000);
+		//Get up average
+		upThreshold = average[3] + average[4] + average[5];
+		std::cout << "Up: " << upThreshold << std::endl;
 
-	//Press any key to resume
-	system("pause");
+		//Calculate threshold
+		upThreshold = upThreshold - 20;
+		std::cout << "Up threshold: " << upThreshold << std::endl;
 
-	//Get In average
-	inThreshold = average[0] + average[3] + average[7];
-	std::cout << "In: " << inThreshold << std::endl;
+		Sleep(1000);
 
-	//Calculate threshold
-	inThreshold = inThreshold - 12;
-	std::cout << "In threshold: " << inThreshold << std::endl;
-	Sleep(1000);
+		///
+		/// DOWN POSE
+		///
 
-	/// 
-	/// MIN FIST
-	/// 
+		std::cout << "Perform Down pose" << std::endl;
+		Sleep(3000);
 
-	std::cout << "Perform Min Fist" << std::endl;
-	Sleep(3000);
+		//press any key to resume
+		system("pause");
 
-	//Press any key to resume
-	system("pause");
+		//Get down average
+		downThreshold = average[0] + average[4] + average[6] + average[7];
+		std::cout << "Down: " << downThreshold << std::endl;
 
-	// Get Min fist average
-	fistMinThreshold = average[0] + average[3] + average[4] + average[5] + average[6] + average[7];
-	std::cout << "Fist: " << fistMinThreshold << std::endl;
-	Sleep(1000);
+		//Calculate threshold
+		downThreshold = downThreshold - 20;
+		std::cout << "Down threshold: " << downThreshold << std::endl;
+		Sleep(1000);
 
-	/// 
-	/// MAX FIST
-	/// 
+		///
+		/// OUT POSE
+		///
 
-	std::cout << "Perform Max Fist" << std::endl;
-	Sleep(3000);
+		std::cout << "Perform Out pose" << std::endl;
+		Sleep(3000);
 
-	//Press any key to resume
-	system("pause");
+		//Press any key to resume
+		system("pause");
 
-	// Get Max fist average
-	fistMaxThreshold = average[0] + average[3] + average[4] + average[5] + average[6] + average[7];
-	std::cout << "Max Fist: " << fistMaxThreshold << std::endl;
-	Sleep(1000);
-	*/
+		//Get out average
+		outThreshold = average[5] + average[6];
+		std::cout << "Out: " << outThreshold << std::endl;
+
+		//Calculate threshold
+		outThreshold = outThreshold - 12;
+		std::cout << "Out threshold: " << outThreshold << std::endl;
+		Sleep(1000);
+
+		///
+		/// IN POSE
+		///
+
+		std::cout << "Perform In pose" << std::endl;
+		Sleep(3000);
+
+		//Press any key to resume
+		system("pause");
+
+		//Get In average
+		inThreshold = average[0] + average[3] + average[7];
+		std::cout << "In: " << inThreshold << std::endl;
+
+		//Calculate threshold
+		inThreshold = inThreshold - 12;
+		std::cout << "In threshold: " << inThreshold << std::endl;
+		Sleep(1000);
+
+		///
+		/// MIN FIST
+		///
+
+		std::cout << "Perform Min Fist" << std::endl;
+		Sleep(3000);
+
+		//Press any key to resume
+		system("pause");
+
+		// Get Min fist average
+		fistMinThreshold = average[0] + average[3] + average[4] + average[5] + average[6] + average[7];
+		std::cout << "Fist: " << fistMinThreshold << std::endl;
+		Sleep(1000);
+
+		///
+		/// MAX FIST
+		///
+
+		std::cout << "Perform Max Fist" << std::endl;
+		Sleep(3000);
+
+		//Press any key to resume
+		system("pause");
+
+		// Get Max fist average
+		fistMaxThreshold = average[0] + average[3] + average[4] + average[5] + average[6] + average[7];
+		std::cout << "Max Fist: " << fistMaxThreshold << std::endl;
+		Sleep(1000);
+		
+	}
+
 	/// 
 	/// ORIENTATION
 	/// 
@@ -372,7 +424,6 @@ void DataCollector::setupMyo() {
 	startYaw = yaw;
 	std::cout << "Yaw: " << startYaw << std::endl;
 
-
 	/// 
 	/// COMPLETE
 	/// 
@@ -383,23 +434,4 @@ void DataCollector::setupMyo() {
 	//Sæt setup værdien til true
 	finishedSetup = true;
 
-}
-
-void DataCollector::ArduinoThread() {
-	while(1) {
-		if (finishedSetup) {
-			sendOrientationToArduino();
-			std::cout << "gg";
-			
-		}
-		Sleep(15);
-	}
-}
-
-//Start threads when constructed
-void DataCollector::startThreads() {
-	std::thread newt(&DataCollector::setupMyo, this);
-	std::thread newt2(&DataCollector::fistModeTimer, this);
-	std::thread newt3(&DataCollector::ArduinoThread, this);
-	newt2.join();
 }

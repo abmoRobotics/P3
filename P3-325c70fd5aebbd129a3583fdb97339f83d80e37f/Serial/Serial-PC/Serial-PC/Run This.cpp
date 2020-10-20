@@ -59,14 +59,8 @@ int _tmain(int argc, _TCHAR* argv[])
 		DataCollector collector;
 		hub.addListener(&collector);
 
-
-
-
-
 		std::thread th1(runHub);
 		collector.startThreads();
-
-
 
 		//Block main until th1 has stopped (will never stop >:) )
 		th1.join();

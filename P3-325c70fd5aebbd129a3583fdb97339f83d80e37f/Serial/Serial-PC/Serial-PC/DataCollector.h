@@ -1,6 +1,7 @@
 #pragma once
 #include <myo/myo.hpp>
 #include <thread>
+#include "Control.h"
 
 //Sound include
 #include <Windows.h>
@@ -9,13 +10,13 @@
 
 class DataCollector : public myo::DeviceListener {
 private:
-	//Thresholds for hver bevælgese
-	int upThreshold = 0;
-	int downThreshold = 0;
-	int outThreshold = 0;
-	int inThreshold = 0;
-	int fistMaxThreshold = 0;
-	int fistMinThreshold = 0;
+	//Thresholds for hver bevælgese (default værdier)
+	int upThreshold = 100;
+	int downThreshold = 120;
+	int outThreshold = 30;
+	int inThreshold = 50;
+	int fistMaxThreshold = 40;
+	int fistMinThreshold = 270;
 
 	//Orientations
 	int roll = 0;
@@ -52,6 +53,14 @@ private:
 	int downAvg = 0;
 	int outAvg = 0;
 	int inAvg = 0;
+
+	//Debug variabler
+	bool showRawEmg = false;
+	bool showMyoData = false;
+	bool showPose = false;
+	bool showOrientation = false;
+
+	arduinoCOM Arduino;
 
 	void fistModeTimer();
 	void onPose(myo::Myo*, uint64_t, myo::Pose);
