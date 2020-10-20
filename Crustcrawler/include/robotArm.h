@@ -7,9 +7,9 @@ class robotArm
 {
     
 private:
-    const float DXL_PROTOCOL_VERSION = 2.0;
+    
     Dynamixel2Arduino *dxl;
-    //Dynamixel2Arduino dxl(DXL_SERIAL, DXL_DIR_PIN);
+   
 public:
     robotArm(Dynamixel2Arduino &dxl);
     void startMotors();

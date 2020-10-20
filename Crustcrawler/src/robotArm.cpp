@@ -3,6 +3,7 @@
 
 robotArm::robotArm(Dynamixel2Arduino &dxl2){
     dxl = &dxl2;
+    const float DXL_PROTOCOL_VERSION = 2.0;
     dxl->begin(57600);
     dxl->setPortProtocolVersion(DXL_PROTOCOL_VERSION);
     startMotors();
@@ -53,5 +54,6 @@ for (size_t i = 1; i < 7; i++)
     dxl->torqueOff(i);
     dxl->setOperatingMode(i, OP_POSITION);
     dxl->torqueOn(i);
+    Serial.print("STARTING");
   }
 }

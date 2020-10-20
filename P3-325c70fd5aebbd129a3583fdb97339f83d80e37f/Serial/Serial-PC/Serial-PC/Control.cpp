@@ -42,13 +42,12 @@ int16_t arduinoCOM::getPosition(int motorID, char Data[256])
 	int16_t firstByte = incomingData[0];
 	int16_t secondByte = (incomingData[1] << 8);	// Shift data 8 bits to the left. 
 	int16_t position = firstByte + secondByte;		// Add the value of the two bytes
-
-	std::cout << ((incomingData[1] << 8) + incomingData[0]) << std::endl;
 	
 	return position;
 }; // Position in radians
-void arduinoCOM::setPosition(int16_t goalPos, char Data[256], int motorID)
+void arduinoCOM::setPosition(int16_t goalPos,int motorID)
 {
+	char Data[256];
 	std::ostringstream sstream;
 	sstream << goalPos;
 	std::string varAsString = sstream.str();
@@ -56,10 +55,10 @@ void arduinoCOM::setPosition(int16_t goalPos, char Data[256], int motorID)
 	Data[1] = motorID;
 	Data[2] = (byte)goalPos;
 	Data[3] = (byte)(goalPos >> 8);
-	
-	
-	//std::cout << Data << std::endl;
+
+	//std::cout << goalPos << std::endl;
 	SP->WriteData(Data, sizeof(Data));
+	
 }; // Måske ikke lav
 double arduinoCOM::getVelocity(int motorID, char Data[256])
 {
