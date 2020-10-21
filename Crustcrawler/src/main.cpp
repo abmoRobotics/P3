@@ -82,7 +82,6 @@ void loop()
     }
     
   }
-    delay(500);
  
   // if (useData == true)
   // {

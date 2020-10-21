@@ -1,13 +1,6 @@
 ﻿  DataCollector.cpp
-C:\Users\ViniciusVini\Desktop\crustcrawler\P3\P3-325c70fd5aebbd129a3583fdb97339f83d80e37f\Serial\Serial-PC\include\myo\cxx\detail\ThrowOnError.hpp(39,1): warning C4297: 'myo::ThrowOnError::~ThrowOnError': function assumed not to throw an exception but does
-C:\Users\ViniciusVini\Desktop\crustcrawler\P3\P3-325c70fd5aebbd129a3583fdb97339f83d80e37f\Serial\Serial-PC\include\myo\cxx\detail\ThrowOnError.hpp(39,1): message : destructor or deallocator has a (possibly implicit) non-throwing exception specification
-C:\Users\ViniciusVini\Desktop\crustcrawler\P3\P3-325c70fd5aebbd129a3583fdb97339f83d80e37f\Serial\Serial-PC\include\myo\cxx\detail\ThrowOnError.hpp(45,1): warning C4297: 'myo::ThrowOnError::~ThrowOnError': function assumed not to throw an exception but does
-C:\Users\ViniciusVini\Desktop\crustcrawler\P3\P3-325c70fd5aebbd129a3583fdb97339f83d80e37f\Serial\Serial-PC\include\myo\cxx\detail\ThrowOnError.hpp(45,1): message : destructor or deallocator has a (possibly implicit) non-throwing exception specification
-  Run This.cpp
-C:\Users\ViniciusVini\Desktop\crustcrawler\P3\P3-325c70fd5aebbd129a3583fdb97339f83d80e37f\Serial\Serial-PC\include\myo\cxx\detail\ThrowOnError.hpp(39,1): warning C4297: 'myo::ThrowOnError::~ThrowOnError': function assumed not to throw an exception but does
-C:\Users\ViniciusVini\Desktop\crustcrawler\P3\P3-325c70fd5aebbd129a3583fdb97339f83d80e37f\Serial\Serial-PC\include\myo\cxx\detail\ThrowOnError.hpp(39,1): message : destructor or deallocator has a (possibly implicit) non-throwing exception specification
-C:\Users\ViniciusVini\Desktop\crustcrawler\P3\P3-325c70fd5aebbd129a3583fdb97339f83d80e37f\Serial\Serial-PC\include\myo\cxx\detail\ThrowOnError.hpp(45,1): warning C4297: 'myo::ThrowOnError::~ThrowOnError': function assumed not to throw an exception but does
-C:\Users\ViniciusVini\Desktop\crustcrawler\P3\P3-325c70fd5aebbd129a3583fdb97339f83d80e37f\Serial\Serial-PC\include\myo\cxx\detail\ThrowOnError.hpp(45,1): message : destructor or deallocator has a (possibly implicit) non-throwing exception specification
-  Source.cpp
-  Generating Code...
-  Serial-PC.vcxproj -> C:\Users\ViniciusVini\Desktop\crustcrawler\P3\P3-325c70fd5aebbd129a3583fdb97339f83d80e37f\Serial\Serial-PC\x64\Debug\Serial-PC.exe
+C:\Users\Jacob Knudsen\Google Drev\Crustcrawler\Projekt\Dynamixel\P3\P3-325c70fd5aebbd129a3583fdb97339f83d80e37f\Serial\Serial-PC\include\myo\cxx\detail\ThrowOnError.hpp(39,1): warning C4297: 'myo::ThrowOnError::~ThrowOnError': function assumed not to throw an exception but does
+C:\Users\Jacob Knudsen\Google Drev\Crustcrawler\Projekt\Dynamixel\P3\P3-325c70fd5aebbd129a3583fdb97339f83d80e37f\Serial\Serial-PC\include\myo\cxx\detail\ThrowOnError.hpp(39,1): message : destructor or deallocator has a (possibly implicit) non-throwing exception specification
+C:\Users\Jacob Knudsen\Google Drev\Crustcrawler\Projekt\Dynamixel\P3\P3-325c70fd5aebbd129a3583fdb97339f83d80e37f\Serial\Serial-PC\include\myo\cxx\detail\ThrowOnError.hpp(45,1): warning C4297: 'myo::ThrowOnError::~ThrowOnError': function assumed not to throw an exception but does
+C:\Users\Jacob Knudsen\Google Drev\Crustcrawler\Projekt\Dynamixel\P3\P3-325c70fd5aebbd129a3583fdb97339f83d80e37f\Serial\Serial-PC\include\myo\cxx\detail\ThrowOnError.hpp(45,1): message : destructor or deallocator has a (possibly implicit) non-throwing exception specification
+  Serial-PC.vcxproj -> C:\Users\Jacob Knudsen\Google Drev\Crustcrawler\Projekt\Dynamixel\P3\P3-325c70fd5aebbd129a3583fdb97339f83d80e37f\Serial\Serial-PC\x64\Debug\Serial-PC.exe

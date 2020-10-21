@@ -201,7 +201,7 @@ void DataCollector::onOrientationData(myo::Myo* myo, uint64_t timestap, const my
 	myoData[6] = newPitch;
 	myoData[7] = newYaw;
 
-	if (showOrientation) {
+	if (showOrientation && finishedSetup) {
 		std::cout << newRoll << "," << newPitch << "," << newYaw << std::endl;
 	}
 
@@ -235,8 +235,12 @@ void DataCollector::sendOrientationToArduino()
 	int16_t goalPosRoll = (fullmotor2 - middlemotor2) / (fullmotor2Deg)*myoData[5] + middlemotor2; //ax+b funktion, udregner ticks ud fra roll degrees
 
 	//Send ny position til arduinoen
+	
 	Arduino.setPosition(goalPosPitch, 1);
+	Sleep(10);
 	Arduino.setPosition(goalPosRoll, 2);
+	
+
 
 
 }
