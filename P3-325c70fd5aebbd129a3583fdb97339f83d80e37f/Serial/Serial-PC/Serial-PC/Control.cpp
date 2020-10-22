@@ -20,15 +20,16 @@ void arduinoCOM::setTorque(double goalTorque, char Data[256], int motorID)
  	SP->WriteData(Data, sizeof(Data));
 }; // Måske ikke lav
 
-int16_t arduinoCOM::getPosition(int motorID, char Data[256])
+int16_t arduinoCOM::getPosition(int motorID)
 {
+	char Data[256];
 	Data[0] = 12;
 	Data[1] = motorID;
 	Data[2] = NULL;
 	Data[3] = NULL;
 
 	char incomingData[256] = "";		// don't forget to pre-allocate memory
-	int dataLength = 255;
+	int dataLength = 9;
 	int readResult = 0;
 	
 	
@@ -36,7 +37,7 @@ int16_t arduinoCOM::getPosition(int motorID, char Data[256])
 
 	bool waitForRead = TRUE;
 	while (readResult == 0) {
-		readResult = SP->ReadData(incomingData, dataLength);
+		readResult = SP->ReadData(incomingData, sizeof(incomingData));
 	}
 
 	int16_t firstByte = incomingData[0];

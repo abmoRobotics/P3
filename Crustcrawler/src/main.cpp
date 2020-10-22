@@ -38,16 +38,11 @@ void loop()
 
   uint8_t command = Data[0];
   uint8_t motorID = Data[1];
-  uint16_t Value = Data[2] + (Data[3] << 8);
-  lcd.clear();
-  lcd.setCursor(0,0);
-  lcd.print(command);
-  lcd.setCursor(4, 0);
-  lcd.print(motorID);
-  lcd.setCursor(10, 0);
-  lcd.print(Value);
+  int16_t Value = Data[2] + (Data[3] << 8);
   
   
+ 
+  //Serial.println( robot->getT(2));
 
   if (useData == true){
     if(command == commandList::setPosition)
@@ -57,7 +52,10 @@ void loop()
 
     else if(command == commandList::getPosition) 
     {
-    robot->getPosition(motorID);
+    int16_t pos = robot->getPosition(motorID);
+      lcd.setCursor(0,0);
+      lcd.clear();
+      lcd.print(pos);
     }
 
     else if(command == commandList::getVelocity) 

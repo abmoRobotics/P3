@@ -166,11 +166,7 @@ void DataCollector::onEmgData(myo::Myo* myo, uint64_t timestamp, const int8_t* e
 }
 
 
-using std::atan2;
-using std::asin;
-using std::sqrt;
-using std::max;
-using std::min;
+
 //Funktionen kaldes når et nyt orientation er givet fra myoband
 void DataCollector::onOrientationData(myo::Myo* myo, uint64_t timestap, const myo::Quaternion<float>& rotation) {
 
@@ -212,36 +208,57 @@ void DataCollector::ArduinoThread() {
 	while(1) {
 		if (finishedSetup) {
 			sendOrientationToArduino();	
+			sendPoseToArduino();
 		}
 		Sleep(15);
 	}
+}
+
+//Sender pose til arduino (up, down, out, in)
+void DataCollector::sendPoseToArduino()
+{
+	if (myoData[0] == 1)
+	{
+		int pos = Arduino.getPosition(3) - 20;
+		std::cout << pos << std::endl;
+		Sleep(50);
+		Arduino.setPosition(pos,3);
+	}
+	else if (1)
+	{
+		int16_t pos2 = Arduino.getPosition(3);
+		std::cout << "POS2:"<<  pos2 << std::endl;
+		Sleep(50);
+		int16_t tete = 1700;
+		Arduino.setPosition((int16_t)1700, 3);
+	}
+	Sleep(50);
 }
 
 //Sender orientationen til arduino
 void DataCollector::sendOrientationToArduino()
 {
 
-	int nullmotor1{ 1250 }; //Ticks når motoren er i nul position
-	int fullmotor1{ 2300 }; //Ticks når motoren er i maks position
-	int middlemotor1 = (fullmotor1 - nullmotor1) / 2 + nullmotor1; //Ticks når motoren er midtvejs
+	int minmotor1{ 2300 }; //Ticks når motoren er i nul position
+	int maxmotor1{ 1250 }; //Ticks når motoren er i maks position
+	int zeromotor1 = minmotor1;
+	//int zeromotor1 = (maxmotor1 - minmotor1) / 2 + minmotor1; //Ticks når motoren er midtvejs
 	int fullmotor1Deg = 90; //Maks grader man kan bevæge armen
 
-	int nullmotor2{ 1350 }; //Ticks når motoren er i nul position
-	int fullmotor2{ 2750 }; //Ticks når motoren er i maks position
-	int middlemotor2 = (fullmotor2 - nullmotor2) / 2 + nullmotor2; //Ticks når motoren er midtvejs
+	int minmotor2{ 2750 }; //Ticks når motoren er i nul position
+	int maxmotor2{ 1350 }; //Ticks når motoren er i maks position
+	int zeromotor2 = (maxmotor2 - minmotor2) / 2 + minmotor2; //Ticks når motoren er midtvejs
 	int fullmotor2Deg = 100; //Maks grader man kan bevæge armen
 
-	int16_t goalPosPitch = (fullmotor1 - middlemotor1) / (fullmotor1Deg)*myoData[6] + middlemotor1; //ax+b funktion, udregner ticks ud fra pitch degrees
-	int16_t goalPosRoll = (fullmotor2 - middlemotor2) / (fullmotor2Deg)*myoData[5] + middlemotor2; //ax+b funktion, udregner ticks ud fra roll degrees
+	int16_t goalPosPitch = (maxmotor1 - zeromotor1) / (fullmotor1Deg)*myoData[6] + zeromotor1; //ax+b funktion, udregner ticks ud fra pitch degrees
+	int16_t goalPosRoll = (maxmotor2 - zeromotor2) / (fullmotor2Deg)*myoData[5] + zeromotor2; //ax+b funktion, udregner ticks ud fra roll degrees
 
 	//Send ny position til arduinoen
 	
 	Arduino.setPosition(goalPosPitch, 1);
-	Sleep(10);
+	Sleep(50);
 	Arduino.setPosition(goalPosRoll, 2);
-	
-
-
+	Sleep(50);
 
 }
 

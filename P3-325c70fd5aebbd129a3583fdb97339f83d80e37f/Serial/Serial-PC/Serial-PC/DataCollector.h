@@ -11,12 +11,12 @@
 class DataCollector : public myo::DeviceListener {
 private:
 	//Thresholds for hver bevælgese (default værdier)
-	int upThreshold = 100;
-	int downThreshold = 120;
+	int upThreshold = 92;
+	int downThreshold = 87;
 	int outThreshold = 30;
-	int inThreshold = 50;
+	int inThreshold = 26;
 	int fistMaxThreshold = 40;
-	int fistMinThreshold = 270;
+	int fistMinThreshold = 215;
 
 	//Orientations
 	int roll = 0;
@@ -72,6 +72,7 @@ private:
 	void CalculateAverage();
 	void GetPose();
 	void sendOrientationToArduino();
+	void sendPoseToArduino();
 	void ArduinoThread();
 public:
 	void startThreads();
