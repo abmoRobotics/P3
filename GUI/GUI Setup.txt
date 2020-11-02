@@ -1,0 +1,18 @@
+Visual studio python build tools
+https://visualstudio.microsoft.com/vs/features/python/
+
+Python til windows (3.7.7)
+https://www.python.org/downloads/windows/
+Husk ekstra settings med tkinter, og downlad debug binaries
+
+Tjek om tkinter virker
+https://docs.python.org/3/library/tkinter.html
+
+Install matplotlib
+https://matplotlib.org/users/installing.html
+
+Fix includes i projecet settings
+C/C++ Additional include directories. python/include
+Linker General Additional library directories. python/libs
+Linkter input Additional dependencies. python39.lib
+
