@@ -11,6 +11,7 @@
 #include <string>
 #define _USE_MATH_DEFINES
 #include<thread>
+#include "Python.h"
 
 //Myo include
 #include <myo/myo.hpp>
@@ -38,10 +39,19 @@ void runHub() {
 int _tmain(int argc, _TCHAR* argv[])
 {
 
+
+	char filename[] = "GUI.py";
+	FILE* fp;
+
+	Py_Initialize();
+
+	fp = _Py_fopen(filename, "r");
+	PyRun_SimpleFile(fp, filename);
+
+	Py_Finalize();
 	
 	
 	try {
-
 		std::cout << "Attempting to find a Myo..." << std::endl;
 
 		myo::Myo* myo = hub.waitForMyo(10000);
