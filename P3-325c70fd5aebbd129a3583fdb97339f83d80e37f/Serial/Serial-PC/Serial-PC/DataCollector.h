@@ -2,6 +2,7 @@
 #include <myo/myo.hpp>
 #include <thread>
 #include "Control.h"
+#include "DataHandler.h"
 
 //Sound include
 #include <Windows.h>
@@ -61,6 +62,7 @@ private:
 	bool showOrientation = false;
 
 	arduinoCOM Arduino;
+	DataHandler dataHandler;
 
 	void fistModeTimer();
 	void onPose(myo::Myo*, uint64_t, myo::Pose);

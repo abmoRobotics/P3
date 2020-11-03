@@ -3,13 +3,17 @@
 #include <iostream>
 #include <fstream>
 
-void DataHandler::SaveData(int Data[100], std::string Filename)
+void DataHandler::SaveEMGData(int Data[100][8], std::string Filename)
 {
     DataFile.open(Filename);
-    for (int i = 0; i < 100; i++)
+    for (int k = 0; k < 8; k++)
     {
-        DataFile << Data[i] << "\n";
+        for (int i = 0; i < 100; i++)
+        {
+            DataFile << Data[i][k] << "\n";
+        }
     }
+
     DataFile.close();
 }
 
@@ -34,4 +38,15 @@ void DataHandler::Rename(char OldFilename[], char NewFilename[])
         perror("Error renaming file");
     else
         std::cout << "File renamed successfully";
+}
+
+void DataHandler::SaveData(int Data[8], std::string Filename)
+{
+    DataFile.open(Filename);
+    for (int k = 0; k < 8; k++)
+    {
+        DataFile << Data[k] << "\n";
+    }
+
+    DataFile.close();
 }

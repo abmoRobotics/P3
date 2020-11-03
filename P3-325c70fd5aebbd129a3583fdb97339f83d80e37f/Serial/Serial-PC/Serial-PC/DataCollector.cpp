@@ -3,6 +3,7 @@
 
 
 
+
 //Funktionen kaldes når vi modtager et nyt pose fra myo
 void DataCollector::onPose(myo::Myo* myo, uint64_t timestamp, myo::Pose pose) {
 
@@ -63,7 +64,7 @@ void DataCollector::CalculateAverage() {
 	}
 
 	//Print rå data
-	if (showRawEmg) {
+	if (showRawEmg && finishedSetup) {
 		for (int i = 0; i < 8; i++) {
 			std::cout << "[" << average[i] << "]";
 		}
@@ -163,6 +164,13 @@ void DataCollector::onEmgData(myo::Myo* myo, uint64_t timestamp, const int8_t* e
 
 	//Counteren for emgData stiger
 	counter++;
+
+	//Send data til TXT fil.(Python læser denne fil)
+	if (counter % 100 == 1) { //1 gange i sekundet. 100/100 = 1
+		dataHandler.SaveEMGData(emgData, "EMGdata.txt");
+		dataHandler.SaveData(average, "AVGdata.txt");
+	}
+
 }
 
 
