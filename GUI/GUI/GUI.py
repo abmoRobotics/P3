@@ -8,19 +8,32 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
+
 def main():
     print("Hello World!")
-    Graph()
-    GUI()
+    data = readFile()
+    Graph(data)
+   #GUI()
 
+def readFile():
+    print("Reading text file")
+    f = open("file.txt", "r")
+    data = []
+    #Read each line
+    for x in f:
+        data.append(x)
+        print(x)
+    print(len(data))
+    f.close()
+    return data
 
-def Graph():
-    plt.axis([0, 10, 0, 1])
+def Graph(data):
+    plt.axis([1, 100, -10, 10])
 
-    for i in range(10):
-        y = np.random.random()
-        plt.scatter(i, y)
-        plt.pause(0.05)
+    plt.plot(data)
+
+    plt.ylabel('Voltage difference')
+    plt.xlabel('')
 
     plt.show()
 

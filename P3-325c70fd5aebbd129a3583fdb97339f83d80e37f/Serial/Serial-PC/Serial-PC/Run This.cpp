@@ -11,7 +11,8 @@
 #include <string>
 #define _USE_MATH_DEFINES
 #include<thread>
-#include "Python.h"
+#include<cppzmq-master/zmq.hpp>
+//#include "Python.h"
 
 //Myo include
 #include <myo/myo.hpp>
@@ -39,7 +40,7 @@ void runHub() {
 int _tmain(int argc, _TCHAR* argv[])
 {
 
-
+	/*
 	char filename[] = "GUI.py";
 	FILE* fp;
 
@@ -48,7 +49,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	fp = _Py_fopen(filename, "r");
 	PyRun_SimpleFile(fp, filename);
 
-	Py_Finalize();
+	Py_Finalize();*/
 	
 	
 	try {

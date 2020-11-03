@@ -152,6 +152,7 @@
     <ClCompile Include="Source.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\include\cppzmq-master\zmq.hpp" />
     <ClInclude Include="..\include\myo\myo.hpp" />
     <ClInclude Include="Control.h" />
     <ClInclude Include="DataCollector.h" />

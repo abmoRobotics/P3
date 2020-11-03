@@ -11,7 +11,7 @@ https://docs.python.org/3/library/tkinter.html
 Install matplotlib
 https://matplotlib.org/users/installing.html
 
-Fix includes i projecet settings
+Fix includes i projecet settings (kun hvis man åbner python direkte fra c++)
 C/C++ Additional include directories. python/include
 Linker General Additional library directories. python/libs
 Linkter input Additional dependencies. python39.lib

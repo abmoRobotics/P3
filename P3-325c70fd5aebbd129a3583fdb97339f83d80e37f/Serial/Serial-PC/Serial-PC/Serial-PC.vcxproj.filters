@@ -41,5 +41,8 @@
     <ClInclude Include="..\include\myo\myo.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\cppzmq-master\zmq.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
