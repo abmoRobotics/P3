@@ -37,8 +37,7 @@ def Graphs():
 
     fig = plt.figure()
 
- 
-    #Smart solution to create 8 figures
+    #Smart solution to create 8 figures (Undgå hardcoding)
     ax = []
     plotLocation =  [241, 242, 243, 244, 245, 246, 247, 248]
     i = 0

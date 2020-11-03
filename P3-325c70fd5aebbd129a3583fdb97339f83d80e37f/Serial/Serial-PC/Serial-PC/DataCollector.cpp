@@ -133,24 +133,6 @@ void DataCollector::onEmgData(myo::Myo* myo, uint64_t timestamp, const int8_t* e
 	//Find pose efter setup er færdig
 	if (finishedSetup) {
 		GetPose();
-		//if(myoData[0])
-		//{ //op 
-		//}
-		//else if(myoData[1])
-		//{ //Ned
-		//}
-		//else if (myoData[2])
-		//{		
-		//}
-		//else if (myoData[3])
-		//{
-		//	//out
-		//}
-		//else if (myoData[4])
-		//{
-		//	//in
-		//}
-		
 	}
 
 	//Indsæt procent i data som skal sendes
@@ -282,7 +264,7 @@ void DataCollector::startThreads() {
 //Kalibrere setup (bliver kaldt af main funktionen når)
 void DataCollector::setupMyo() {
 
-
+	//Loop indtil arduino er connected
 	if (!Arduino.isConnected())
 	{
 		std::cout << "Arduino is not connected" << std::endl;
@@ -302,6 +284,7 @@ void DataCollector::setupMyo() {
 	/// DEBUG
 	/// 
 
+	//Her kan brugeren bestemme hvilken data de vil vise i terminalen
 	char input;
 	std::cout << "Show raw EMG data [y/n]" << std::endl; std::cin >> input;	
 	if (input == 'y') showRawEmg = true;
