@@ -11,7 +11,6 @@
 #include <string>
 #define _USE_MATH_DEFINES
 #include<thread>
-#include<cppzmq-master/zmq.hpp>
 //#include "Python.h"
 
 //Myo include

@@ -27,6 +27,9 @@
     <ClCompile Include="DataCollector.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="DataHandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SerialClass.h">
@@ -41,7 +44,7 @@
     <ClInclude Include="..\include\myo\myo.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\cppzmq-master\zmq.hpp">
+    <ClInclude Include="DataHandler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
