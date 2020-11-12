@@ -148,6 +148,7 @@
   <ItemGroup>
     <ClCompile Include="Control.cpp" />
     <ClCompile Include="DataCollector.cpp" />
+    <ClCompile Include="DataCollectorFilter.cpp" />
     <ClCompile Include="DataHandler.cpp" />
     <ClCompile Include="Run This.cpp" />
     <ClCompile Include="Source.cpp" />
@@ -156,6 +157,7 @@
     <ClInclude Include="..\include\myo\myo.hpp" />
     <ClInclude Include="Control.h" />
     <ClInclude Include="DataCollector.h" />
+    <ClInclude Include="DataCollectorFilter.h" />
     <ClInclude Include="DataHandler.h" />
     <ClInclude Include="SerialClass.h" />
   </ItemGroup>

@@ -16,7 +16,7 @@
 #include <myo/myo.hpp>
 
 //Include class
-#include "DataCollector.h"
+#include "DataCollectorFilter.h"
 #define pi = 3.14159
 
 

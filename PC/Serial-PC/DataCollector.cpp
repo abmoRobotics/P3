@@ -1,4 +1,4 @@
-#include "DataCollector.h"
+/*#include "DataCollector.h"
 #include <math.h>
 
 
@@ -447,3 +447,4 @@ void DataCollector::setupMyo() {
 	finishedSetup = true;
 
 }
+*/

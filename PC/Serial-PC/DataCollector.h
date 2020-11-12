@@ -1,4 +1,4 @@
-#pragma once
+/*#pragma once
 #include <myo/myo.hpp>
 #include <thread>
 #include "Control.h"
@@ -78,4 +78,4 @@ private:
 	void ArduinoThread();
 public:
 	void startThreads();
-};
+};*/
