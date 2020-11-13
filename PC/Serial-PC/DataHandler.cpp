@@ -22,8 +22,9 @@ void DataHandler::Delete(std::string Filename)
 
 }
 
-void DataHandler::Plot(std::string Filename)
+void DataHandler::Plot(int Data[16])
 {
+
 }
 
 void DataHandler::Clear(std::string Filename)

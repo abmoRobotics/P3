@@ -52,6 +52,18 @@ private:
 
 	int myoData[8]; //myoData som bliver sendt videre til arduino
 
+
+	/*int[] upThreshold = {0, 0, 50, 0, 0, 30, 0, 0}
+	int[] UpFistHighpods = {0,0,1,0,0,1,0,0}
+	int[] UpFistLowpods = {1, 1, 0, 1, 1, 0, 0, 0}
+	int[] inativeupThres = { 20, 15, 0, 0, 15, 20};*/
+
+	int MaxPods[4][8];
+	int MinPods[4][8];
+	//int upMaxPods[8];
+	//int upMinPods[8];
+
+
 	//Værdien af hver bevægelse, som fås når man filtererer rå EMG data og lægger pods sammen
 	int fistValue = 0;
 	int upValue = 0;
@@ -62,6 +74,8 @@ private:
 	//Debug variabler
 	bool showRawData = false;
 	bool showFilteredData = false;
+	bool showIntervalData = false;
+	bool showPoses = false;
 	bool showMyoData = false;
 	bool showPose = false;
 	bool showOrientation = false;
@@ -74,7 +88,8 @@ private:
 	void onEmgData(myo::Myo*, uint64_t, const int8_t*);
 	void onOrientationData(myo::Myo*, uint64_t, const myo::Quaternion<float>&);
 	void setupMyo();
-
+	void setupMyo2();
+	int GETPOSE();
 	void getData(const int8_t*);
 	void applyFilter();
 	void getPose();

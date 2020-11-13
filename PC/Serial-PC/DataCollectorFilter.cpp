@@ -69,7 +69,7 @@ void DataCollector::applyFilter() {
 	}
 
 
-	//Print rå data
+	//Print filtreret data
 	if (showFilteredData && finishedSetup) {
 		for (int i = 0; i < 8; i++) {
 			std::cout << "[" << (int)filteredEmg[i] << "]";
@@ -92,7 +92,39 @@ void DataCollector::applyFilter() {
 void DataCollector::getPose() {
 	//If statements som finder ud af hvilken bevgælese der bliver lavet
 
-	if (downValue > downThreshold && filteredEmg[1] <= 25 && filteredEmg[2] <= 15 && filteredEmg[3] <= 15 && !fistModeOn) {
+	//for loop master
+	bool movements[4] = {1, 1, 1, 1}; //[up, down, out, in]
+	for (int i = 0; i < 4; i++) {
+		for (int j = 0; j < 8; j++) {
+			if (filteredEmg[j] < MinPods[i][j] || filteredEmg[j] > MaxPods[i][j]) {
+				movements[i] = false;
+			}
+		}
+	}
+
+	//Prints
+	if (showIntervalData) {
+		for (int i = 0; i < 4; i++) {
+			for (int j = 0; j < 8; j++) {
+				std::cout << i << ": " << movements[i];
+				std::cout << " EMG: ";
+				for (int k = 0; k < 8; k++) {
+					std::cout << " [" << (int)filteredEmg[k] << "]" << "(" << MaxPods[i][k] << " " << MinPods[i][k] << ")";
+				}
+				std::cout << "" << std::endl;
+			}
+		}
+	}
+	
+	if (showPoses) {
+		for (int i = 0; i < 4; i++) {
+			std::cout << " [" << movements[i] << "]";
+		}
+		std::cout << " " << std::endl;
+	}
+
+ 
+	/*if (downValue > downThreshold && filteredEmg[1] <= 25 && filteredEmg[2] <= 15 && filteredEmg[3] <= 15 && !fistModeOn) {
 		myoData[1] = 1;
 	}
 	else if (upValue > upThreshold && filteredEmg[1] <= 25 && filteredEmg[6] <= 25 && filteredEmg[7] <= 25 && !fistModeOn) {
@@ -111,7 +143,7 @@ void DataCollector::getPose() {
 		if (procent > 100) {
 			procent = 100;
 		}
-	}
+	}*/
 
 }
 
@@ -253,10 +285,59 @@ void DataCollector::sendOrientationToArduino()
 
 //Start threads when constructed
 void DataCollector::startThreads() {
-	std::thread t(&DataCollector::setupMyo, this);
+	std::thread t(&DataCollector::setupMyo2, this);
 	std::thread t2(&DataCollector::fistModeTimer, this);
 	std::thread t3(&DataCollector::arduinoThread, this);
 	t2.join();
+}
+
+void DataCollector::setupMyo2(){
+	//Her kan brugeren bestemme hvilken data de vil vise i terminalen
+	char input;
+
+	std::cout << "Show raw data [y/n]" << std::endl; std::cin >> input;	
+	if (input == 'y') showRawData = true;
+
+	std::cout << "Show filtered data [y/n]" << std::endl; std::cin >> input;	
+	if (input == 'y') showFilteredData = true;
+
+	std::cout << "Show interval data [y/n]" << std::endl; std::cin >> input;	
+	if (input == 'y') showIntervalData = true;
+
+	if (!showIntervalData) {
+		std::cout << "Show poses array [y/n]" << std::endl; std::cin >> input;
+		if (input == 'y') showPoses = true;
+	}
+
+	std::cout << "Starting setup" << std::endl;
+	std::cout << "Perform Up pose" << std::endl;
+
+	float temp = T;
+	T = T_calibration; //Sæt Tidskonstanten lig før kalibrering (Filteringen tager længere tid, men spiker ikke så meget)
+
+	//MaxPods[x][y]
+
+	//press any key to resume
+	//system("pause");
+	for(int i = 0; i < 4; i++){
+		system("pause");
+		for(int j = 0; j < 8; j++){ //
+			float value = filteredEmg[j];
+			//Max og min er udregnet med en funktion
+			MaxPods[i][j] = 7.7 * pow(value, -0.46) * value;
+			MinPods[i][j] = (0.01 * pow(value, 2)) + (0.23 * value) - 1.42;
+			if (MinPods[i][j] < 0) MinPods[i][j] = 0;
+			std::cout << i << ": " << "Pod[" << j << "]: [" << (int)value << "] (" << MaxPods[i][j] << " " << MinPods[i][j] << std::endl;
+		}
+		
+	}
+	//for loop gennem alle pods
+
+	//system("pause");
+
+	T = temp;
+	finishedSetup = true;
+
 }
 
 //Kalibrere setup (bliver kaldt af main funktionen når)
