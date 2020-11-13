@@ -1,1 +1,20 @@
-﻿  Serial-PC.vcxproj -> C:\Users\emilt\Documents\Robotics\P3\GitHub\2020-11-11 P3\PC\x64\Debug\Serial-PC.exe
+﻿  DataCollectorFilter.cpp
+C:\Users\Jesper Mortensen\Desktop\p3\P3\PC\include\myo\cxx\detail\ThrowOnError.hpp(39,1): warning C4297: 'myo::ThrowOnError::~ThrowOnError': function assumed not to throw an exception but does
+C:\Users\Jesper Mortensen\Desktop\p3\P3\PC\include\myo\cxx\detail\ThrowOnError.hpp(39,1): message : destructor or deallocator has a (possibly implicit) non-throwing exception specification
+C:\Users\Jesper Mortensen\Desktop\p3\P3\PC\include\myo\cxx\detail\ThrowOnError.hpp(45,1): warning C4297: 'myo::ThrowOnError::~ThrowOnError': function assumed not to throw an exception but does
+C:\Users\Jesper Mortensen\Desktop\p3\P3\PC\include\myo\cxx\detail\ThrowOnError.hpp(45,1): message : destructor or deallocator has a (possibly implicit) non-throwing exception specification
+C:\Users\Jesper Mortensen\Desktop\p3\P3\PC\Serial-PC\DataCollectorFilter.h(39,10): warning C4305: 'initializing': truncation from 'double' to 'float'
+C:\Users\Jesper Mortensen\Desktop\p3\P3\PC\Serial-PC\DataCollectorFilter.h(40,22): warning C4305: 'initializing': truncation from 'double' to 'float'
+C:\Users\Jesper Mortensen\Desktop\p3\P3\PC\Serial-PC\DataCollectorFilter.h(41,11): warning C4305: 'initializing': truncation from 'double' to 'float'
+C:\Users\Jesper Mortensen\Desktop\p3\P3\PC\Serial-PC\DataCollectorFilter.cpp(120,25): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
+C:\Users\Jesper Mortensen\Desktop\p3\P3\PC\Serial-PC\DataCollectorFilter.cpp(337,44): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
+C:\Users\Jesper Mortensen\Desktop\p3\P3\PC\Serial-PC\DataCollectorFilter.cpp(338,60): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
+C:\Users\Jesper Mortensen\Desktop\p3\P3\PC\Serial-PC\DataCollectorFilter.cpp(351,29): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
+C:\Users\Jesper Mortensen\Desktop\p3\P3\PC\Serial-PC\DataCollectorFilter.cpp(361,29): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
+C:\Users\Jesper Mortensen\Desktop\p3\P3\PC\Serial-PC\DataCollectorFilter.cpp(442,49): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
+C:\Users\Jesper Mortensen\Desktop\p3\P3\PC\Serial-PC\DataCollectorFilter.cpp(462,68): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
+C:\Users\Jesper Mortensen\Desktop\p3\P3\PC\Serial-PC\DataCollectorFilter.cpp(481,33): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
+C:\Users\Jesper Mortensen\Desktop\p3\P3\PC\Serial-PC\DataCollectorFilter.cpp(500,49): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
+C:\Users\Jesper Mortensen\Desktop\p3\P3\PC\Serial-PC\DataCollectorFilter.cpp(519,105): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
+C:\Users\Jesper Mortensen\Desktop\p3\P3\PC\Serial-PC\DataCollectorFilter.cpp(534,105): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
+  Serial-PC.vcxproj -> C:\Users\Jesper Mortensen\Desktop\p3\P3\PC\x64\Debug\Serial-PC.exe

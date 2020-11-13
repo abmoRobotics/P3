@@ -77,30 +77,63 @@ void DataCollector::applyFilter() {
 		std::cout << " " << std::endl;
 	}
 
-	//Den filtreret data bruges til hver bevælgelse
-	fistValue = filteredEmg[0] + filteredEmg[3] + filteredEmg[4] + filteredEmg[5] + filteredEmg[6] + filteredEmg[7];
-	upValue = filteredEmg[3] + filteredEmg[4] + filteredEmg[5];
-	downValue = filteredEmg[0] + filteredEmg[4] + filteredEmg[6] + filteredEmg[7];
-	outValue = filteredEmg[5] + filteredEmg[6];
-	inValue = filteredEmg[0] + filteredEmg[3] + filteredEmg[7];
-
-	//std::cout << upValue << std::endl;
-
 }
 
 //Sætter de første 4 Myodata, afhængig af pose
 void DataCollector::getPose() {
-	//If statements som finder ud af hvilken bevgælese der bliver lavet
 
-	//for loop master
+	//for loop master jesper
+	//Tjekker hvilken pose der bliver lavet
 	bool movements[4] = {1, 1, 1, 1}; //[up, down, out, in]
 	for (int i = 0; i < 4; i++) {
 		for (int j = 0; j < 8; j++) {
-			if (filteredEmg[j] < MinPods[i][j] || filteredEmg[j] > MaxPods[i][j]) {
+			if (filteredEmg[j] < MinPods[i][j] || filteredEmg[j] > MaxPods[i][j]) { //Hvis pod IKKE er i invervallet
 				movements[i] = false;
 			}
 		}
 	}
+
+	//Fixer så flere poses ikke kan være aktive på samme tid
+	//Kør i gennem alle poses, tjek om de er aktive, og deaktivere resten
+	for (int i = 0; i < 4; i++) {
+		if (movements[i]) {
+			for (int j = 0; j < 4; j++) { //Reset alle movements til 0
+				movements[j] = false;
+			}
+			movements[i] = true; //Sæt den aktive pose til true igen
+		}
+	}
+
+	//Fist
+	if (fistModeOn) {
+		//Sætter alle "movements" til at være 0	 
+		for (int i = 0; i < 4; i++) {
+			movements[i] = 0;
+		}
+
+
+		//Regner summen af alle pods ud
+		int sum = 0;
+		int sumMin = 0;
+		int sumMax = 0;
+		for (int i = 0; i < 8; i++) {
+			sum = filteredEmg[i] + sum; //Sum af nuværende pods
+			sumMin = fistMin[i] + sumMin; //Sum af kalibreret min fist
+			sumMax = fistMax[i] + sumMax; //Sum af den kalibreret max Fist
+		} 
+
+		//Regner procent
+		procent = (((float)sum - (float)sumMin) / ((float)sumMax - (float)sumMin)) * 100;
+		//I tilfælde at man kommer over 100%
+		if (procent > 100) {
+			procent = 100;
+		}
+		else if(procent < 0){
+			procent = 0;
+		}
+	}
+
+
 
 	//Prints
 	if (showIntervalData) {
@@ -120,30 +153,8 @@ void DataCollector::getPose() {
 		for (int i = 0; i < 4; i++) {
 			std::cout << " [" << movements[i] << "]";
 		}
-		std::cout << " " << std::endl;
+		std::cout << " [" << (int)procent << "%]" << std::endl;
 	}
-
- 
-	/*if (downValue > downThreshold && filteredEmg[1] <= 25 && filteredEmg[2] <= 15 && filteredEmg[3] <= 15 && !fistModeOn) {
-		myoData[1] = 1;
-	}
-	else if (upValue > upThreshold && filteredEmg[1] <= 25 && filteredEmg[6] <= 25 && filteredEmg[7] <= 25 && !fistModeOn) {
-		myoData[0] = 1;
-	}
-	else if (inValue > inThreshold && filteredEmg[6] <= 12 && !fistModeOn) {
-		myoData[3] = 1;
-	}
-	else if (outValue > outThreshold && filteredEmg[0] < 20 && filteredEmg[1] <= 10 && filteredEmg[2] <= 10 && filteredEmg[3] <= 20 && !fistModeOn) {
-		myoData[2] = 1;
-	}
-	//Hvis fist bliver lavet, udregn procent
-	else if (fistValue > fistMinThreshold && fistModeOn) {
-		procent = ((float)fistValue / (float)fistMaxThreshold) * 100;
-		//I tilfælde at man kommer over 100%
-		if (procent > 100) {
-			procent = 100;
-		}
-	}*/
 
 }
 
@@ -310,16 +321,15 @@ void DataCollector::setupMyo2(){
 	}
 
 	std::cout << "Starting setup" << std::endl;
-	std::cout << "Perform Up pose" << std::endl;
+	//std::cout << "Perform Up pose" << std::endl;
 
 	float temp = T;
 	T = T_calibration; //Sæt Tidskonstanten lig før kalibrering (Filteringen tager længere tid, men spiker ikke så meget)
 
-	//MaxPods[x][y]
-
 	//press any key to resume
 	//system("pause");
 	for(int i = 0; i < 4; i++){
+		std::cout << "Perform pose " << i << std::endl;
 		system("pause");
 		for(int j = 0; j < 8; j++){ //
 			float value = filteredEmg[j];
@@ -327,13 +337,48 @@ void DataCollector::setupMyo2(){
 			MaxPods[i][j] = 7.7 * pow(value, -0.46) * value;
 			MinPods[i][j] = (0.01 * pow(value, 2)) + (0.23 * value) - 1.42;
 			if (MinPods[i][j] < 0) MinPods[i][j] = 0;
-			std::cout << i << ": " << "Pod[" << j << "]: [" << (int)value << "] (" << MaxPods[i][j] << " " << MinPods[i][j] << std::endl;
+			std::cout << i << ": " << "Pod[" << j << "]: [" << (int)value << "] (" << MaxPods[i][j] << " " << MinPods[i][j] << ") " << std::endl;
 		}
-		
+	
 	}
-	//for loop gennem alle pods
 
-	//system("pause");
+	Sleep(500);
+	
+	std::cout << "Perform minimum fist" << std::endl;
+	system("pause");
+
+	for (int i = 0; i < 8; i++) { //
+		fistMin[i] = filteredEmg[i];
+		std::cout << i << ": " << "Pod[" << i << "]: [" << fistMin[i] << "]" << std::endl;
+	}
+
+	Sleep(500);
+	
+	std::cout << "Perform maximum fist" << std::endl;
+	system("pause");
+
+	for (int i = 0; i < 8; i++) { //
+		fistMax[i] = filteredEmg[i];
+		std::cout << i << ": " << "Pod[" << i << "]: [" << fistMax[i] << "]" << std::endl;
+	}
+
+	Sleep(500);
+
+	/// 
+	/// ORIENTATION
+	/// 
+
+	std::cout << "Initialize Orientation Setup" << std::endl;
+	Sleep(500);
+	std::cout << "- Move arm to factory settings -" << std::endl;
+
+	system("pause");
+	std::cout << "Orientation calibrated" << std::endl;
+
+	Sleep(500);
+
+	std::cout << "Calibration Complete" << std::endl;
+	system("pause");
 
 	T = temp;
 	finishedSetup = true;

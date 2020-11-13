@@ -51,25 +51,10 @@ private:
 	int sampleSize = 100; //200 = 1 sekund, 100 = 0.5 sekund osv.
 
 	int myoData[8]; //myoData som bliver sendt videre til arduino
-
-
-	/*int[] upThreshold = {0, 0, 50, 0, 0, 30, 0, 0}
-	int[] UpFistHighpods = {0,0,1,0,0,1,0,0}
-	int[] UpFistLowpods = {1, 1, 0, 1, 1, 0, 0, 0}
-	int[] inativeupThres = { 20, 15, 0, 0, 15, 20};*/
-
 	int MaxPods[4][8];
 	int MinPods[4][8];
-	//int upMaxPods[8];
-	//int upMinPods[8];
-
-
-	//Værdien af hver bevægelse, som fås når man filtererer rå EMG data og lægger pods sammen
-	int fistValue = 0;
-	int upValue = 0;
-	int downValue = 0;
-	int outValue = 0;
-	int inValue = 0;
+	int fistMin[8];
+	int fistMax[8];
 
 	//Debug variabler
 	bool showRawData = false;
