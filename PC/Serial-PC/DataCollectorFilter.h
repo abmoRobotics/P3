@@ -31,7 +31,7 @@ private:
 
 	//Er true når emgData array er fyldt
 	bool avgReady = false;
-	bool fistModeOn = false;
+	bool fistControlOn = false;
 	bool finishedSetup = false;
 
 	float procent = 0; //Procent af fist
@@ -73,8 +73,6 @@ private:
 	void onEmgData(myo::Myo*, uint64_t, const int8_t*);
 	void onOrientationData(myo::Myo*, uint64_t, const myo::Quaternion<float>&);
 	void setupMyo();
-	void setupMyo2();
-	int GETPOSE();
 	void getData(const int8_t*);
 	void applyFilter();
 	void getPose();
