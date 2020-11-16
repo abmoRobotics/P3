@@ -14,14 +14,13 @@ public:
     robotArm(Dynamixel2Arduino &dxl);
     void startMotors();
     double getTorque(int motorID);
-    void setTorque(int motorID, int goalTorque); // Måske ikke lav
+    void setTorque(int motorID, float goalTorque); // Måske ikke lav
     int16_t getPosition(int motorID);             // Position in radians
     void setPosition(int motorID, int16_t goalPos);  // Måske ikke lav
     double getVelocity(int motorID);
     void setVelocity(int motorID, int goalVel);
-    void gripperOpen(int GripperL, int GripperR);
-    void gripperClose(int GripperL, int GripperR);
-    int getT(int motorID);
+    double calculatePWM(int motorid, float torque, int PWM = 0);
+    void dataGatherer();
 };
 enum commandList {
      setTorque = 10,

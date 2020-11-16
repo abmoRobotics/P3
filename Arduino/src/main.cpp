@@ -11,8 +11,7 @@ LiquidCrystal_I2C lcd(0x27, 16, 2);
 void setup()
 {
   Serial.begin(115200);
-  Serial.println("Setup running");
-  // put your setup code here, to run once:
+  Serial3.begin(115200);
   pinMode(LED_BUILTIN, OUTPUT);
   robot = new robotArm(dxl);
   lcd.init();
@@ -24,26 +23,25 @@ void setup()
 
 void loop()
 {
-  
-  
+  robot->dataGatherer();
   bool useData = false;
   int Data[256];    //OBS: ændret fra int; First byte = command, second byte = motor id, third and fourth byte = value(int16_t)
   int i = 0;
-  while (Serial.available() > 0)
-  {
-    Data[i] = Serial.read();
-    i++;
-    useData = true;
-  }
+  
+  // while (Serial.available() > 0)
+  // {
+  //   Data[i] = Serial.read();
+  //   i++;
+  //   useData = true;
+  // }
 
   uint8_t command = Data[0];
   uint8_t motorID = Data[1];
   int16_t Value = Data[2] + (Data[3] << 8);
   
 
-  
+
  
-  //Serial.println( robot->getT(2));
 
   if (useData == true){
     if(command == commandList::setPosition)
