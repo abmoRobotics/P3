@@ -3,18 +3,38 @@
 #include <iostream>
 #include <fstream>
 
-void DataHandler::SaveEMGData(int Data[100][8], std::string Filename)
-{
-    DataFile.open(Filename);
-    for (int k = 0; k < 8; k++)
+void DataHandler::UpdateEMG(int Data[8]){
+    //Move all rows up by one
+    for (int i = 0; i < 99; i++)
     {
-        for (int i = 0; i < 100; i++)
+        for (int k = 0; k < 8; k++)
         {
-            DataFile << Data[i][k] << "\n";
+            EMG[i][k] = EMG[i + 1][k];
         }
     }
 
-    DataFile.close();
+    //Update the buttom row from the new data
+    for (int i = 0; i < 8; i++)
+    {
+        EMG[99][i] = Data[i];
+    }
+}
+
+void DataHandler::UpdateAVG(float Data[8]){
+    //Move all rows up by one
+    for (int i = 0; i < 99; i++)
+    {
+        for (int k = 0; k < 8; k++)
+        {
+            AVG[i][k] = AVG[i + 1][k];
+        }
+    }
+
+    //Update the buttom row from the new data
+    for (int i = 0; i < 8; i++)
+    {
+        AVG[99][i] = Data[i];
+    }
 }
 
 void DataHandler::Delete(std::string Filename)
@@ -41,13 +61,30 @@ void DataHandler::Rename(char OldFilename[], char NewFilename[])
         std::cout << "File renamed successfully";
 }
 
-void DataHandler::SaveData(int Data[8], std::string Filename)
+void DataHandler::SaveEMGData(int Data[8], std::string Filename)
 {
+    UpdateEMG(Data);
     DataFile.open(Filename);
-    for (int k = 0; k < 8; k++)
+    for (int i = 0; i < 100; i++)
     {
-        DataFile << Data[k] << "\n";
+        for (int k = 0; k < 8; k++)
+        {
+            DataFile << EMG[i][k] << "\n";
+        }
     }
+    DataFile.close();
+}
 
+void DataHandler::SaveAVGData(float Data[8], std::string Filename)
+{
+    UpdateAVG(Data);
+    DataFile.open(Filename);
+    for (int i = 0; i < 100; i++)
+    {
+        for (int k = 0; k < 8; k++)
+        {
+            DataFile << AVG[i][k] << "\n";
+        }
+    }
     DataFile.close();
 }

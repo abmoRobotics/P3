@@ -12,7 +12,7 @@ void DataCollector::onPose(myo::Myo* myo, uint64_t timestamp, myo::Pose pose) {
 		}
 		//Begynd fistmode hvis procent er 0
 		else if (procent == 0) {
-			fistModeOn = true;
+			fistControlOn = true;
 
 		}
 	}
@@ -23,16 +23,15 @@ void DataCollector::onPose(myo::Myo* myo, uint64_t timestamp, myo::Pose pose) {
 void DataCollector::fistModeTimer() {
 	while (true) {
 		Sleep(10);
-		if (fistModeOn) { //Når man har dobbeltappet
+		if (fistControlOn) { //Når man har dobbeltappet
 			Sleep(5000);
-			fistModeOn = false;
+			fistControlOn = false;
 			std::cout << "LOCKED" << std::endl;
 			PlaySound(TEXT("targetLocked.wav"), NULL, SND_SYNC);
 		}
 	}
 }
-
-//Get rawEmg data and put it in the array: emgSamples
+// Får rawEmg data og sætter det ind i et array: emgSamples
 void DataCollector::getData(const int8_t* emg) {
 	//Modtag data
 	for (int i = 0; i < 8; i++)
@@ -41,15 +40,13 @@ void DataCollector::getData(const int8_t* emg) {
 		rawEmg[i] = emg[i]; //Gem nuværende emg data
 	}
 
+	//Printer data i terminalen
 	if (finishedSetup && showRawData) {
 		for (int i = 0; i < 8; i++) {
 			std::cout << "[" << rawEmg[i] << "]";
 		}
 		std::cout << " " << std::endl;
 	}
-
-	//std::cout << " raw: " << rawEmg[4] << std::endl;
-	//std::cout << " prev: " << previousRawEmg[4] << std::endl;
 
 }
 
@@ -82,11 +79,10 @@ void DataCollector::applyFilter() {
 //Sætter de første 4 Myodata, afhængig af pose
 void DataCollector::getPose() {
 
-	//for loop master jesper
 	//Tjekker hvilken pose der bliver lavet
 	bool movements[4] = {1, 1, 1, 1}; //[up, down, out, in]
-	for (int i = 0; i < 4; i++) {
-		for (int j = 0; j < 8; j++) {
+	for (int i = 0; i < 4; i++) { // Kører igennem alle movements
+		for (int j = 0; j < 8; j++) { // Kører igennem alle filteret pods
 			if (filteredEmg[j] < MinPods[i][j] || filteredEmg[j] > MaxPods[i][j]) { //Hvis pod IKKE er i invervallet
 				movements[i] = false;
 			}
@@ -94,7 +90,7 @@ void DataCollector::getPose() {
 	}
 
 	//Fixer så flere poses ikke kan være aktive på samme tid
-	//Kør i gennem alle poses, tjek om de er aktive, og deaktivere resten
+	//Kører i gennem alle poses, tjekker om de er aktive, og deaktiverer resten
 	for (int i = 0; i < 4; i++) {
 		if (movements[i]) {
 			for (int j = 0; j < 4; j++) { //Reset alle movements til 0
@@ -105,7 +101,7 @@ void DataCollector::getPose() {
 	}
 
 	//Fist
-	if (fistModeOn) {
+	if (fistControlOn) {
 		//Sætter alle "movements" til at være 0	 
 		for (int i = 0; i < 4; i++) {
 			movements[i] = 0;
@@ -128,6 +124,7 @@ void DataCollector::getPose() {
 		if (procent > 100) {
 			procent = 100;
 		}
+		//i tilfælde at man kommer under 0%
 		else if(procent < 0){
 			procent = 0;
 		}
@@ -148,7 +145,7 @@ void DataCollector::getPose() {
 			}
 		}
 	}
-	
+	//Prints
 	if (showPoses) {
 		for (int i = 0; i < 4; i++) {
 			std::cout << " [" << movements[i] << "]";
@@ -163,7 +160,7 @@ void DataCollector::onEmgData(myo::Myo* myo, uint64_t timestamp, const int8_t* e
 {
 	myo->unlock(myo::Myo::unlockHold); //myo bandet unlockes hver 5 millisekund for at sikre at dobbeltap virker på første forsøg)
 
-	//Modtag rå emgData og indsæt i en matrixe, samt flyt tidligere data i en anden matrix
+	//Modtag rå emgData og indsæt i en matrice, samt flyt tidligere data i en anden matrice
 	getData(emg);
 
 	//Filtrerer rå emg data
@@ -186,7 +183,7 @@ void DataCollector::onEmgData(myo::Myo* myo, uint64_t timestamp, const int8_t* e
 	//Print myoData i konsol
 	if (finishedSetup && showMyoData)
 		std::cout << "[" << myoData[0] << "," << myoData[1] << "," << myoData[2] << "," << myoData[3] << "," << myoData[4] << "," << myoData[5] << "," << myoData[6] << "," << myoData[7] << "]" << std::endl;
-	else if (finishedSetup && showPose)
+	else if (finishedSetup && showPose)	
 		std::cout << "[" << myoData[0] << "," << myoData[1] << "," << myoData[2] << "," << myoData[3] << "," << myoData[4] << "]" << std::endl;
 
 	//Counteren for emgData stiger
@@ -194,7 +191,8 @@ void DataCollector::onEmgData(myo::Myo* myo, uint64_t timestamp, const int8_t* e
 
 	//Send data til TXT fil.(Python læser denne fil)
 	if (counter % 100 == 1) { //1 gange i sekundet. 100/100 = 1
-		//dataHandler.SaveData(filteredEmg, "AVGdata.txt");
+		dataHandler.SaveEMGData(rawEmg, "RawData.txt");
+		dataHandler.SaveAVGData(filteredEmg, "FilteredData.txt");
 	}
 
 }
@@ -207,14 +205,13 @@ void DataCollector::onOrientationData(myo::Myo* myo, uint64_t timestap, const my
 	int newYaw = 0;
 
 	//Udregn euler angles(roll, pitch, yaw) udfra quaternion
-
-	float rollRad = atan2(2.0f * (rotation.w() * rotation.x() + rotation.y() * rotation.z()), //quik maffs
+	float rollRad = atan2(2.0f * (rotation.w() * rotation.x() + rotation.y() * rotation.z()),
 		1.0f - 2.0f * (rotation.x() * rotation.x() + rotation.y() * rotation.y()));
 	float pitchRad = asin(max(-1.0f, min(1.0f, 2.0f * (rotation.w() * rotation.y() - rotation.z() * rotation.x()))));
 	float yawRad = atan2(2.0f * (rotation.w() * rotation.z() + rotation.x() * rotation.y()),
 		1.0f - 2.0f * (rotation.y() * rotation.y() + rotation.z() * rotation.z()));
 
-	//Convert to degrees
+	//Konverterer radianer til grader
 	roll = (int)(rollRad * 180 / M_PI);
 	pitch = (int)(pitchRad * 180 / M_PI);
 	yaw = (int)(yawRad * 180 / M_PI);
@@ -296,13 +293,23 @@ void DataCollector::sendOrientationToArduino()
 
 //Start threads when constructed
 void DataCollector::startThreads() {
-	std::thread t(&DataCollector::setupMyo2, this);
+	std::thread t(&DataCollector::setupMyo, this);
 	std::thread t2(&DataCollector::fistModeTimer, this);
 	std::thread t3(&DataCollector::arduinoThread, this);
 	t2.join();
 }
 
-void DataCollector::setupMyo2(){
+//Kalibrerings funktion
+void DataCollector::setupMyo(){
+	//Loop indtil arduino er connected
+	if (!Arduino.isConnected())
+	{
+		std::cout << "Arduino is not connected" << std::endl;
+		Sleep(500);
+	}
+
+	std::cout << "Arduino is connected!" << std::endl;
+
 	//Her kan brugeren bestemme hvilken data de vil vise i terminalen
 	char input;
 
@@ -321,22 +328,25 @@ void DataCollector::setupMyo2(){
 	}
 
 	std::cout << "Starting setup" << std::endl;
-	//std::cout << "Perform Up pose" << std::endl;
 
 	float temp = T;
 	T = T_calibration; //Sæt Tidskonstanten lig før kalibrering (Filteringen tager længere tid, men spiker ikke så meget)
 
-	//press any key to resume
-	//system("pause");
+	//Kører igennem 4 poses og modtager max & min værdier for hver pod
 	for(int i = 0; i < 4; i++){
+
+		//vent på brugeren trykker
 		std::cout << "Perform pose " << i << std::endl;
 		system("pause");
+
+		//Kører igennem alle filteret emg pods
 		for(int j = 0; j < 8; j++){ //
 			float value = filteredEmg[j];
-			//Max og min er udregnet med en funktion
+			//Max og min er udregnet med to funktioner som skalerer værdien (potens & polynomium)
 			MaxPods[i][j] = 7.7 * pow(value, -0.46) * value;
 			MinPods[i][j] = (0.01 * pow(value, 2)) + (0.23 * value) - 1.42;
 			if (MinPods[i][j] < 0) MinPods[i][j] = 0;
+			//Print i terminalen
 			std::cout << i << ": " << "Pod[" << j << "]: [" << (int)value << "] (" << MaxPods[i][j] << " " << MinPods[i][j] << ") " << std::endl;
 		}
 	
@@ -344,9 +354,10 @@ void DataCollector::setupMyo2(){
 
 	Sleep(500);
 	
+	//Kalibrere min fist
 	std::cout << "Perform minimum fist" << std::endl;
 	system("pause");
-
+	//Kører igennem alle filteret emg pods
 	for (int i = 0; i < 8; i++) { //
 		fistMin[i] = filteredEmg[i];
 		std::cout << i << ": " << "Pod[" << i << "]: [" << fistMin[i] << "]" << std::endl;
@@ -354,9 +365,10 @@ void DataCollector::setupMyo2(){
 
 	Sleep(500);
 	
+	//Kalibrerer max fist
 	std::cout << "Perform maximum fist" << std::endl;
 	system("pause");
-
+	//Kører igennem alle filteret emg pods
 	for (int i = 0; i < 8; i++) { //
 		fistMax[i] = filteredEmg[i];
 		std::cout << i << ": " << "Pod[" << i << "]: [" << fistMax[i] << "]" << std::endl;
@@ -380,193 +392,9 @@ void DataCollector::setupMyo2(){
 	std::cout << "Calibration Complete" << std::endl;
 	system("pause");
 
+	//Reset T værdien til hvad den var før kalibrering
 	T = temp;
-	finishedSetup = true;
-
-}
-
-//Kalibrere setup (bliver kaldt af main funktionen når)
-void DataCollector::setupMyo() {
-
-	//Loop indtil arduino er connected
-	if (!Arduino.isConnected())
-	{
-		std::cout << "Arduino is not connected" << std::endl;
-		Sleep(500);
-	}
-
-	std::cout << "Arduino is connected!" << std::endl;
-
-	std::cout << "Starting setup" << std::endl;
-
-
-	/// 
-	/// DEBUG
-	/// 
-
-	//Her kan brugeren bestemme hvilken data de vil vise i terminalen
-	char input;
-
-	std::cout << "Show raw data [y/n]" << std::endl; std::cin >> input;	
-	if (input == 'y') showRawData = true;
-
-	std::cout << "Show filtered data [y/n]" << std::endl; std::cin >> input;	
-	if (input == 'y') showFilteredData = true;
-
-	std::cout << "Show myoData [y/n]" << std::endl; std::cin >> input;
-	if (input == 'y') showMyoData = true;
-
-	//Skip setup
-	std::cout << "Run calibration setup? [y/n]" << std::endl;
-	std::cin >> input;
-
-	if(input == 'y'){
-
-		float temp = T;
-		T = T_calibration; //Sæt Tidskonstanten lig før kalibrering (Filteringen tager længere tid, men spiker ikke så meget)
-
-		std::cout << "Welcome to Myoband Calibration Setup" << std::endl;
-		system("pause");
-
-		/// 
-		/// UP POSE
-		/// 
-
-		std::cout << "Perform Up pose" << std::endl;
-		Sleep(3000);
-
-		//press any key to resume
-		system("pause");
-
-		//Get up average
-		upThreshold = filteredEmg[3] + filteredEmg[4] + filteredEmg[5];
-		std::cout << "Up: " << upThreshold << std::endl;
-
-		//Calculate threshold
-		upThreshold = upThreshold - 20;
-		std::cout << "Up threshold: " << upThreshold << std::endl;
-
-		Sleep(1000);
-
-		///
-		/// DOWN POSE
-		///
-
-		std::cout << "Perform Down pose" << std::endl;
-		Sleep(3000);
-
-		//press any key to resume
-		system("pause");
-
-		//Get down average
-		downThreshold = filteredEmg[0] + filteredEmg[4] + filteredEmg[6] + filteredEmg[7];
-		std::cout << "Down: " << downThreshold << std::endl;
-
-		//Calculate threshold
-		downThreshold = downThreshold - 20;
-		std::cout << "Down threshold: " << downThreshold << std::endl;
-		Sleep(1000);
-
-		///
-		/// OUT POSE
-		///
-
-		std::cout << "Perform Out pose" << std::endl;
-		Sleep(3000);
-
-		//Press any key to resume
-		system("pause");
-
-		//Get out average
-		outThreshold = filteredEmg[5] + filteredEmg[6];
-		std::cout << "Out: " << outThreshold << std::endl;
-
-		//Calculate threshold
-		outThreshold = outThreshold - 12;
-		std::cout << "Out threshold: " << outThreshold << std::endl;
-		Sleep(1000);
-
-		///
-		/// IN POSE
-		///
-
-		std::cout << "Perform In pose" << std::endl;
-		Sleep(3000);
-
-		//Press any key to resume
-		system("pause");
-
-		//Get In average
-		inThreshold = filteredEmg[0] + filteredEmg[3] + filteredEmg[7];
-		std::cout << "In: " << inThreshold << std::endl;
-
-		//Calculate threshold
-		inThreshold = inThreshold - 12;
-		std::cout << "In threshold: " << inThreshold << std::endl;
-		Sleep(1000);
-
-		///
-		/// MIN FIST
-		///
-
-		std::cout << "Perform Min Fist" << std::endl;
-		Sleep(3000);
-
-		//Press any key to resume
-		system("pause");
-
-		// Get Min fist average
-		fistMinThreshold = filteredEmg[0] + filteredEmg[3] + filteredEmg[4] + filteredEmg[5] + filteredEmg[6] + filteredEmg[7];
-		std::cout << "Fist: " << fistMinThreshold << std::endl;
-		Sleep(1000);
-
-		///
-		/// MAX FIST
-		///
-
-		std::cout << "Perform Max Fist" << std::endl;
-		Sleep(3000);
-
-		//Press any key to resume
-		system("pause");
-
-		// Get Max fist average
-		fistMaxThreshold = filteredEmg[0] + filteredEmg[3] + filteredEmg[4] + filteredEmg[5] + filteredEmg[6] + filteredEmg[7];
-		std::cout << "Max Fist: " << fistMaxThreshold << std::endl;
-		Sleep(1000);
-
-		T = temp; //Reset T tilbage igen
-		
-	}
-
-	/// 
-	/// ORIENTATION
-	/// 
-
-	std::cout << "Initialize Orientation Setup" << std::endl;
-	Sleep(2000);
-	std::cout << "- Move arm to factory settings -" << std::endl;
-
-	system("pause");
-	std::cout << "Orientation values are: " << std::endl;
-
-	startRoll = roll;
-	std::cout << "roll: " << startRoll << std::endl;
-
-	startPitch = pitch;
-	std::cout << "Pitch: " << startPitch << std::endl;
-
-	startYaw = yaw;
-	std::cout << "Yaw: " << startYaw << std::endl;
-
-	/// 
-	/// COMPLETE
-	/// 
-	std::cout << "Calibration completed" << std::endl;
-	Sleep(1000);
-	system("pause");
-
-	//Sæt setup værdien til true
+	//Færdiggør setup
 	finishedSetup = true;
 
 }
