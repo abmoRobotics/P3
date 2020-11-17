@@ -183,7 +183,7 @@ void DataCollector::onEmgData(myo::Myo* myo, uint64_t timestamp, const int8_t* e
 	//Print myoData i konsol
 	if (finishedSetup && showMyoData)
 		std::cout << "[" << myoData[0] << "," << myoData[1] << "," << myoData[2] << "," << myoData[3] << "," << myoData[4] << "," << myoData[5] << "," << myoData[6] << "," << myoData[7] << "]" << std::endl;
-	else if (finishedSetup && showPose)
+	else if (finishedSetup && showPose)	
 		std::cout << "[" << myoData[0] << "," << myoData[1] << "," << myoData[2] << "," << myoData[3] << "," << myoData[4] << "]" << std::endl;
 
 	//Counteren for emgData stiger
@@ -191,7 +191,8 @@ void DataCollector::onEmgData(myo::Myo* myo, uint64_t timestamp, const int8_t* e
 
 	//Send data til TXT fil.(Python læser denne fil)
 	if (counter % 100 == 1) { //1 gange i sekundet. 100/100 = 1
-		//dataHandler.SaveData(filteredEmg, "AVGdata.txt");
+		dataHandler.SaveEMGData(rawEmg, "RawData.txt");
+		dataHandler.SaveAVGData(filteredEmg, "FilteredData.txt");
 	}
 
 }
