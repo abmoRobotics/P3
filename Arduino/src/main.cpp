@@ -3,7 +3,7 @@
 #include "robotArm.h"
 #include "LiquidCrystal_I2C.h"
 
-LiquidCrystal_I2C lcd(0x27, 16, 2);
+//LiquidCrystal_I2C lcd(0x27, 16, 2);
 
  Dynamixel2Arduino dxl(DXL_SERIAL, 2);
  robotArm* robot;
@@ -11,12 +11,11 @@ LiquidCrystal_I2C lcd(0x27, 16, 2);
 void setup()
 {
   Serial.begin(115200);
-  Serial.println("Setup running");
-  // put your setup code here, to run once:
+  Serial3.begin(115200);
   pinMode(LED_BUILTIN, OUTPUT);
   robot = new robotArm(dxl);
-  lcd.init();
-  lcd.backlight();
+  //lcd.init();
+  //lcd.backlight();
 }
 
 
@@ -24,50 +23,24 @@ void setup()
 
 void loop()
 {
-  
-  
-  bool useData = false;
-  int Data[256];    //OBS: ændret fra int; First byte = command, second byte = motor id, third and fourth byte = value(int16_t)
-  int i = 0;
-  while (Serial.available() > 0)
-  {
-    Data[i] = Serial.read();
-    i++;
-    useData = true;
-  }
-
-  uint8_t command = Data[0];
-  uint8_t motorID = Data[1];
-  int16_t Value = Data[2] + (Data[3] << 8);
+ robot->dataGatherer();
+uint8_t command = robot->Instruction;
+uint8_t motorID = robot->MotorID;
+  //int16_t Value = Data[2] + (Data[3] << 8);
   
 
-  
+
  
-  //Serial.println( robot->getT(2));
 
-  if (useData == true){
+  if (robot->dataGatherer()){
     if(command == commandList::setPosition)
     {
-      robot->setPosition(motorID, Value);
-      lcd.clear();
-      lcd.setCursor(0,1);
-  lcd.print(command);
-  lcd.setCursor(5,1);
-  lcd.print(motorID);
-  lcd.setCursor(10,1);
-  lcd.print(Value);
-  }
+      robot->setPosition(motorID, robot->Parameters[1]);//Ændre tallet når vi lige finder ud af det
+    }
 
     else if(command == commandList::getPosition) 
     {
     int16_t pos = robot->getPosition(motorID);
-      lcd.clear();
-      lcd.setCursor(0,0);
-      lcd.print(pos);
-      lcd.setCursor(0,1);
-      lcd.print(command);
-      lcd.setCursor(5,1);
-     lcd.print(motorID);
   
     }
 
@@ -78,8 +51,7 @@ void loop()
 
     else if(command == commandList::setVelocity)
     {
-      robot->setVelocity(motorID, Value); //i tvivl om vi skaljghg bruge Value som variable. 
-      //men vi sender vel kun en værdi, enten position, torque eller velocity, right?
+      robot->setVelocity(motorID, robot->Parameters[1]); //Ændre tallet når vi lige finder ud af det
     }
 
     else if (command == commandList::getTorque)
@@ -89,7 +61,7 @@ void loop()
     
     else if (command == commandList::setTorque)
     {
-      robot->setTorque(motorID, Value);
+      robot->setTorque(motorID, robot->Parameters[1]);//Ændre tallet når vi lige finder ud af det
     }
     
   }
