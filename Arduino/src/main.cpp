@@ -23,15 +23,29 @@ void setup()
 
 void loop()
 {
+ robot->dataGatherer();
+uint8_t command = robot->Instruction;
+uint8_t motorID = robot->MotorID;
+  //int16_t Value = Data[2] + (Data[3] << 8);
+//  robot->setTorque(1, -1.3699);
+  //robot->setTorque(2, -0.0087);
+  //robot->setTorque(3, -0.0980);
+  //robot->setTorque(4, 0); 
+  robot->ControlSystem(-0.3, 0, 0, 0);
 
-  
+  //double a =  robot->ControlSystem(0, 0, 0, 0); 
+ //double a = robot->getPositionRad(3);
+ //double b = robot->getPositionRad(2);
+ //double c = robot->getPositionRad(4);
+  //Serial.print("Motor 2 ");
+  //Serial.println(b);
+  //Serial.print("Motor 3 ");
+  //Serial.println(a);
+  //Serial.print("Motor 4 ");
+ // Serial.println(c);
 
-
- 
 
   if (robot->dataGatherer()){
-    uint8_t command = robot->Instruction;
-    uint8_t motorID = robot->MotorID;
     if(command == commandList::setPosition)
     {
       robot->setPosition(motorID, robot->Parameters[1]);//Ændre tallet når vi lige finder ud af det
@@ -40,6 +54,7 @@ void loop()
     else if(command == commandList::getPosition) 
     {
     int16_t pos = robot->getPosition(motorID);
+  
     }
 
     else if(command == commandList::getVelocity) 
