@@ -26,6 +26,7 @@ public:
     double getVelocity(int motorID);
     void setVelocity(int motorID, int goalVel);
     double calculatePWM(int motorid, float torque);
+    void setPWM(int motorID, float PWM);
     bool dataGatherer();
     double getPositionRad(int motorID);
     unsigned short CalculateCRC(unsigned short crc_accum, unsigned char *data_blk_ptr, unsigned short data_blk_size);

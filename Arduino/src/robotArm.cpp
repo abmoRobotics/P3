@@ -14,7 +14,7 @@ robotArm::robotArm(Dynamixel2Arduino &dxl2)
 double robotArm::getTorque(int motorID)
 {
     double measuredTorque = dxl->getPresentCurrent(motorID);
-    return measuredTorque;
+    return measuredTorque; 
 }
 
 void robotArm::setTorque(int motorID, float goalTorque)
