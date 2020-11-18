@@ -31,6 +31,7 @@ uint8_t motorID = robot->MotorID;
   //robot->setTorque(2, -0.0087);
   //robot->setTorque(3, -0.0980);
   //robot->setTorque(4, 0); 
+  
   robot->ControlSystem(-0.3, 0, 0, 0);
 
   //double a =  robot->ControlSystem(0, 0, 0, 0); 

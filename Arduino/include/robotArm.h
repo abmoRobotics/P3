@@ -26,6 +26,7 @@ public:
     double getVelocity(int motorID);
     void setVelocity(int motorID, int goalVel);
     double calculatePWM(int motorid, float torque);
+    void setPWM(int motorID, float PWM);
     bool dataGatherer();
     double getPositionRad(int motorID);
     void setPWM(int motorID, float PWM);
