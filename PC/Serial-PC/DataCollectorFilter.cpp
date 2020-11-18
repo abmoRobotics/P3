@@ -239,10 +239,12 @@ void DataCollector::onOrientationData(myo::Myo* myo, uint64_t timestap, const my
 void DataCollector::arduinoThread() {
 	while(1) {
 		if (finishedSetup) {
-			sendOrientationToArduino();	
-			sendPoseToArduino();
+			//sendOrientationToArduino();	
+			//sendPoseToArduino();
 		}
-		Sleep(15);
+		unsigned char array[] { 0xab, 0xac };
+		Arduino.serialData(0x01, 0xaa, array);
+		Sleep(2000);
 	}
 }
 
@@ -296,10 +298,10 @@ void DataCollector::sendOrientationToArduino()
 
 //Start threads when constructed
 void DataCollector::startThreads() {
-	std::thread t(&DataCollector::setupMyo2, this);
-	std::thread t2(&DataCollector::fistModeTimer, this);
+	//std::thread t(&DataCollector::setupMyo2, this);
+	//std::thread t2(&DataCollector::fistModeTimer, this);
 	std::thread t3(&DataCollector::arduinoThread, this);
-	t2.join();
+	t3.join();
 }
 
 void DataCollector::setupMyo2(){
