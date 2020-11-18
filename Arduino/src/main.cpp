@@ -3,7 +3,7 @@
 #include "robotArm.h"
 #include "LiquidCrystal_I2C.h"
 
-LiquidCrystal_I2C lcd(0x27, 16, 2);
+//LiquidCrystal_I2C lcd(0x27, 16, 2);
 
  Dynamixel2Arduino dxl(DXL_SERIAL, 2);
  robotArm* robot;
@@ -14,8 +14,8 @@ void setup()
   Serial3.begin(115200);
   pinMode(LED_BUILTIN, OUTPUT);
   robot = new robotArm(dxl);
-  lcd.init();
-  lcd.backlight();
+  //lcd.init();
+  //lcd.backlight();
 }
 
 

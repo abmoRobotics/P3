@@ -1,14 +1,7 @@
-﻿  DataCollectorFilter.cpp
-C:\Users\emilt\Documents\Robotics\P3\GitHub\2020-11-17 P3\P3\PC\include\myo\cxx\detail\ThrowOnError.hpp(39,1): warning C4297: 'myo::ThrowOnError::~ThrowOnError': function assumed not to throw an exception but does
-C:\Users\emilt\Documents\Robotics\P3\GitHub\2020-11-17 P3\P3\PC\include\myo\cxx\detail\ThrowOnError.hpp(39,1): message : destructor or deallocator has a (possibly implicit) non-throwing exception specification
-C:\Users\emilt\Documents\Robotics\P3\GitHub\2020-11-17 P3\P3\PC\include\myo\cxx\detail\ThrowOnError.hpp(45,1): warning C4297: 'myo::ThrowOnError::~ThrowOnError': function assumed not to throw an exception but does
-C:\Users\emilt\Documents\Robotics\P3\GitHub\2020-11-17 P3\P3\PC\include\myo\cxx\detail\ThrowOnError.hpp(45,1): message : destructor or deallocator has a (possibly implicit) non-throwing exception specification
-C:\Users\emilt\Documents\Robotics\P3\GitHub\2020-11-17 P3\P3\PC\Serial-PC\DataCollectorFilter.h(39,16): warning C4305: 'initializing': truncation from 'double' to 'float'
-C:\Users\emilt\Documents\Robotics\P3\GitHub\2020-11-17 P3\P3\PC\Serial-PC\DataCollectorFilter.h(40,27): warning C4305: 'initializing': truncation from 'double' to 'float'
-C:\Users\emilt\Documents\Robotics\P3\GitHub\2020-11-17 P3\P3\PC\Serial-PC\DataCollectorFilter.h(41,18): warning C4305: 'initializing': truncation from 'double' to 'float'
-C:\Users\emilt\Documents\Robotics\P3\GitHub\2020-11-17 P3\P3\PC\Serial-PC\DataCollectorFilter.cpp(116,25): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
-C:\Users\emilt\Documents\Robotics\P3\GitHub\2020-11-17 P3\P3\PC\Serial-PC\DataCollectorFilter.cpp(353,44): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
-C:\Users\emilt\Documents\Robotics\P3\GitHub\2020-11-17 P3\P3\PC\Serial-PC\DataCollectorFilter.cpp(354,60): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
-C:\Users\emilt\Documents\Robotics\P3\GitHub\2020-11-17 P3\P3\PC\Serial-PC\DataCollectorFilter.cpp(369,29): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
-C:\Users\emilt\Documents\Robotics\P3\GitHub\2020-11-17 P3\P3\PC\Serial-PC\DataCollectorFilter.cpp(380,29): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
-  Serial-PC.vcxproj -> C:\Users\emilt\Documents\Robotics\P3\GitHub\2020-11-17 P3\P3\PC\x64\Debug\Serial-PC.exe
+﻿  Control.cpp
+C:\Users\Jacob Knudsen\Google Drev\Crustcrawler\Projekt\Dynamixel\P3\PC\Serial-PC\Control.cpp(17,23): warning C4244: 'initializing': conversion from 'int16_t' to 'byte', possible loss of data
+C:\Users\Jacob Knudsen\Google Drev\Crustcrawler\Projekt\Dynamixel\P3\PC\Serial-PC\Control.cpp(56,20): warning C4244: 'initializing': conversion from 'int16_t' to 'byte', possible loss of data
+C:\Users\Jacob Knudsen\Google Drev\Crustcrawler\Projekt\Dynamixel\P3\PC\Serial-PC\Control.cpp(85,20): warning C4244: 'initializing': conversion from 'int16_t' to 'byte', possible loss of data
+C:\Users\Jacob Knudsen\Google Drev\Crustcrawler\Projekt\Dynamixel\P3\PC\Serial-PC\Control.cpp(122,78): warning C4267: 'argument': conversion from 'size_t' to 'unsigned short', possible loss of data
+C:\Users\Jacob Knudsen\Google Drev\Crustcrawler\Projekt\Dynamixel\P3\PC\Serial-PC\Control.cpp(133,50): warning C4267: 'argument': conversion from 'size_t' to 'unsigned int', possible loss of data
+  Serial-PC.vcxproj -> C:\Users\Jacob Knudsen\Google Drev\Crustcrawler\Projekt\Dynamixel\P3\PC\x64\Debug\Serial-PC.exe

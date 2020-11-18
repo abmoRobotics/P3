@@ -17,7 +17,7 @@ from matplotlib import animation
 
 
 #Sti til txt filerne
-PATH = os.path.normpath(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir, os.pardir,'PC','Serial-PC'))
+PATH = os.path.normpath(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir, os.pardir,'P3-325c70fd5aebbd129a3583fdb97339f83d80e37f','Serial','Serial-PC','Serial-PC'))
 
 
 #Læs indholdet af en txt fil og returnere indholdet i et array
@@ -29,7 +29,7 @@ def readFile(FileName):
     data = []
     #Læs hver linje i txt filen
     for x in f:
-        data.append(float(x)) #Tilføj hver linje til arrayet
+        data.append(int(x)) #Tilføj hver linje til arrayet
     f.close()
     return data
 
@@ -75,29 +75,28 @@ def Graphs():
     while 1: #While loop som kører for evigt
 
         #Modtag data fra txt filerne
-        rawData = readFile("RawData.txt")
-        avgData = readFile("FilteredData.txt")
+        rawData = readFile("EMGdata.txt")
+        avgData = readFile("AVGdata.txt")
         data = ConvertArray(rawData)
-        dataavg = ConvertArray(avgData)
 
         #Opdatere hver plot med det nye data
         #:, betyder søjle.
         line0.set_ydata(data[:,0]) #Opdatere linje0's data med pod 0's data. (Søjlen i data[0])
-        line01.set_ydata(dataavg[:,0])
+        line01.set_ydata(avgData[0])
         line1.set_ydata(data[:,1])
-        line11.set_ydata(dataavg[:,1])
+        line11.set_ydata(avgData[1])
         line2.set_ydata(data[:,2])
-        line21.set_ydata(dataavg[:,2])
+        line21.set_ydata(avgData[2])
         line3.set_ydata(data[:,3])
-        line31.set_ydata(dataavg[:,3])
+        line31.set_ydata(avgData[3])
         line4.set_ydata(data[:,4])
-        line41.set_ydata(dataavg[:,4])
+        line41.set_ydata(avgData[4])
         line5.set_ydata(data[:,5])
-        line51.set_ydata(dataavg[:,5])
+        line51.set_ydata(avgData[5])
         line6.set_ydata(data[:,6])
-        line61.set_ydata(dataavg[:,6])
+        line61.set_ydata(avgData[6])
         line7.set_ydata(data[:,7])
-        line71.set_ydata(dataavg[:,7])
+        line71.set_ydata(avgData[7])
 
         fig.canvas.draw()
         fig.canvas.flush_events()
@@ -116,12 +115,12 @@ def ConvertArray(Input):
     #Deklarere et tomt array
     Data = np.zeros((100,8));
     i = 0
-    k = 0
+    index = 0
     #for loop magi
     for x in Input:
-        if i % 8 == 0:
-            k += 1
-        Data[k-1][i % 8] = Input[i]
+        Data[i % 100][index] = Input[i]
+        if i % 100 == 99:
+            index += 1
         i += 1
     return Data
 

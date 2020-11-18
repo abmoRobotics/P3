@@ -278,28 +278,28 @@ bool robotArm::dataGatherer()
     bool debug = true;
     byte header[5]{};
     byte lenght{};
-    Serial3.readBytesUntil(0x00, header, 5);
+    Serial.readBytesUntil(0x00, header, 5);
     if (header[0] == 0xFF && header[1] == 0xFF && header[2] == 0xFD && header[4] == 0x00)
     {
         int starttime = micros();
 
         lenght = header[3];
 
-        while (Serial3.available() < lenght)
+        while (Serial.available() < lenght)
         {
             // Serial.println("WAITING");
         }
 
         byte ReadData[lenght]{};
 
-        Serial3.readBytes(ReadData, lenght);
+        Serial.readBytes(ReadData, lenght);
         int ID = ReadData[0];
         byte Instruction = ReadData[1];
 
         byte ReadCRC[2]{};
         ReadCRC[0] = ReadData[lenght - 2];
         ReadCRC[1] = ReadData[lenght - 1];
-        int16_t RecievedCRC = (ReadCRC[0] << 8) | ReadCRC[1];
+        unsigned short RecievedCRC = (ReadCRC[0] << 8) | ReadCRC[1];
 
         unsigned int datasize = lenght - 4;
         byte Param[datasize]{};
@@ -324,37 +324,38 @@ bool robotArm::dataGatherer()
         
         if(debug == true)
         {
-            int Endtime = micros();
+        int Endtime = micros();
         int Processtime = Endtime - starttime;
 
-        Serial.print("Recieved CRC: "); Serial.print(ReadCRC[0]); Serial.print("    "); Serial.print(ReadCRC[1]); Serial.print("    ");
-        Serial.println(RecievedCRC);
+        //Serial3.write(ReadCRC[0]); Serial3.write(ReadCRC[1]);
+        //Serial3.write(RecievedCRC);
 
-        Serial.print("Motor ID: "); Serial.println((int)ID);
-        Serial.print("Length of message: "); Serial.println((int)lenght);
-        Serial.print("Instruction: "); Serial.println((int)Instruction);
-        Serial.print("Data: ");
+        //Serial3.write((int)ID);
+        //Serial3.write((int)lenght);
+        //Serial3.write((int)Instruction)
 
-        for (size_t i = 0; i < datasize; i++)
-        {
-            Serial.print(Param[i]); Serial.print("   ");
-        }
-        Serial.println();
-        Serial.print("Calculated CRC:"); Serial.print(ReadCRC[0]); Serial.print("   "); Serial.println(ReadCRC[1]);
-        Serial.println(CalcCRC);
+        //Serial3.write(CalcCRC);
 
-        Serial.print("Data used to calibrate CRC: ");
         for (size_t i = 0; i < sizeof(CRCArray); i++)
         {
-            Serial.print(CRCArray[i]); Serial.print("     ");
+            Serial3.write(CRCArray[i]);
         }
-        Serial.println();
+
+        Serial3.write(ReadCRC[0]); 
+        Serial3.write(ReadCRC[1]);
+        byte CRC2 = CalcCRC & 0xff;
+        byte CRC1 = (CalcCRC >> 8);
         
-        Serial.print("Elapsed time in microseconds: "); Serial.println(Processtime);
+        Serial3.write(CRC1); 
+        Serial3.write(CRC2);
+        Serial3.write(Processtime);
         }
         
         if (CalcCRC == RecievedCRC)
         {
+            digitalWrite(LED_BUILTIN, HIGH);
+            delay(500);
+            digitalWrite(LED_BUILTIN, LOW);
             for (size_t i = 0; i < sizeof(ReadData) - 2; i++)
             {
                 robotArm::Parameters[i] = Param[i];
@@ -365,10 +366,10 @@ bool robotArm::dataGatherer()
         }
         else
         {
-            Serial.println("DATA WAS CORRUPTED");
+            Serial.println("\nDATA WAS CORRUPTED");
             return false;
         }
-
+    
         
     }
     return false;
