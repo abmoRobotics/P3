@@ -64,6 +64,7 @@ private:
 	bool showMyoData = false;
 	bool showPose = false;
 	bool showOrientation = false;
+	bool showVisualisation = false;
 
 	arduinoCOM Arduino;
 	DataHandler dataHandler;

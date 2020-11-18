@@ -78,26 +78,26 @@ def Graphs():
         rawData = readFile("RawData.txt")
         avgData = readFile("FilteredData.txt")
         data = ConvertArray(rawData)
-        dataavg = ConvertArray(rawData)
+        dataavg = ConvertArray(avgData)
 
         #Opdatere hver plot med det nye data
         #:, betyder søjle.
         line0.set_ydata(data[:,0]) #Opdatere linje0's data med pod 0's data. (Søjlen i data[0])
         line01.set_ydata(dataavg[:,0])
         line1.set_ydata(data[:,1])
-        line11.set_ydata(dataavg[:,0])
+        line11.set_ydata(dataavg[:,1])
         line2.set_ydata(data[:,2])
-        line21.set_ydata(dataavg[:,0])
+        line21.set_ydata(dataavg[:,2])
         line3.set_ydata(data[:,3])
-        line31.set_ydata(dataavg[:,0])
+        line31.set_ydata(dataavg[:,3])
         line4.set_ydata(data[:,4])
-        line41.set_ydata(dataavg[:,0])
+        line41.set_ydata(dataavg[:,4])
         line5.set_ydata(data[:,5])
-        line51.set_ydata(dataavg[:,0])
+        line51.set_ydata(dataavg[:,5])
         line6.set_ydata(data[:,6])
-        line61.set_ydata(dataavg[:,0])
+        line61.set_ydata(dataavg[:,6])
         line7.set_ydata(data[:,7])
-        line71.set_ydata(dataavg[:,0])
+        line71.set_ydata(dataavg[:,7])
 
         fig.canvas.draw()
         fig.canvas.flush_events()
@@ -116,12 +116,12 @@ def ConvertArray(Input):
     #Deklarere et tomt array
     Data = np.zeros((100,8));
     i = 0
-    index = 0
+    k = 0
     #for loop magi
     for x in Input:
-        Data[i % 100][index] = Input[i]
-        if i % 100 == 99:
-            index += 1
+        if i % 8 == 0:
+            k += 1
+        Data[k-1][i % 8] = Input[i]
         i += 1
     return Data
 

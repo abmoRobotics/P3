@@ -186,13 +186,18 @@ void DataCollector::onEmgData(myo::Myo* myo, uint64_t timestamp, const int8_t* e
 	else if (finishedSetup && showPose)	
 		std::cout << "[" << myoData[0] << "," << myoData[1] << "," << myoData[2] << "," << myoData[3] << "," << myoData[4] << "]" << std::endl;
 
-	//Counteren for emgData stiger
 	counter++;
 
-	//Send data til TXT fil.(Python læser denne fil)
-	if (counter % 100 == 1) { //1 gange i sekundet. 100/100 = 1
-		dataHandler.SaveEMGData(rawEmg, "RawData.txt");
-		dataHandler.SaveAVGData(filteredEmg, "FilteredData.txt");
+	//Visualiser EMG Data
+	if(showVisualisation){
+		//Counteren for emgData stiger
+		dataHandler.UpdateAVG(filteredEmg);
+		dataHandler.UpdateEMG(rawEmg);
+		//Send data til TXT fil.(Python læser denne fil)
+		if (counter % 100 == 1) { //1 gange i sekundet. 100/100 = 1
+			dataHandler.SaveEMGData(rawEmg, "RawData.txt");
+			dataHandler.SaveAVGData(filteredEmg, "FilteredData.txt");
+		}
 	}
 
 }
@@ -326,6 +331,8 @@ void DataCollector::setupMyo(){
 		std::cout << "Show poses array [y/n]" << std::endl; std::cin >> input;
 		if (input == 'y') showPoses = true;
 	}
+	std::cout << "Visualise raw data and filtered data [y/n]" << std::endl; std::cin >> input;
+	if (input == 'y') showVisualisation = true;
 
 	std::cout << "Starting setup" << std::endl;
 

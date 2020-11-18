@@ -63,7 +63,6 @@ void DataHandler::Rename(char OldFilename[], char NewFilename[])
 
 void DataHandler::SaveEMGData(int Data[8], std::string Filename)
 {
-    UpdateEMG(Data);
     DataFile.open(Filename);
     for (int i = 0; i < 100; i++)
     {
@@ -77,7 +76,6 @@ void DataHandler::SaveEMGData(int Data[8], std::string Filename)
 
 void DataHandler::SaveAVGData(float Data[8], std::string Filename)
 {
-    UpdateAVG(Data);
     DataFile.open(Filename);
     for (int i = 0; i < 100; i++)
     {

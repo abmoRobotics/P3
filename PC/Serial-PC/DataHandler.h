@@ -13,11 +13,12 @@ public:
 	void Rename(char OldFilename[], char NewFilename[]);	//Omdøb filnavn
 	void SaveEMGData(int Data[8], std::string Filename);		//Gem Data[8] i en fil
 	void SaveAVGData(float Data[8], std::string Filename);		//Gem Data[8] i en fil
+	void UpdateEMG(int Data[8]);	//Gem EMG data i en fil.
+	void UpdateAVG(float Data[8]);	//Gem EMG data i en fil.
 
 private:
 	std::ofstream DataFile;			//Objekt, hvor metoder til håndtering af filer ligger i.
 	float EMG[100][8] = { 0 };
 	float AVG[100][8] = { 0 };
-	void UpdateEMG(int Data[8]);	//Gem EMG data i en fil.
-	void UpdateAVG(float Data[8]);	//Gem EMG data i en fil.
+
 };
