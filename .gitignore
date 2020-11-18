@@ -6,3 +6,10 @@
 /P3-325c70fd5aebbd129a3583fdb97339f83d80e37f/Serial/Serial-PC/.vs/Serial-PC/v16
 /Crustcrawler/.vs
 /Crustcrawler/.pio (1)
+/PC/.vs/Serial-PC/v16/ipch/AutoPCH/31c77e56153f14d5/CONTROL.ipch
+*.ipch
+*.db-wal
+/PC/.vs/Serial-PC/v16/Browse.VC.opendb
+/PC/.vs/Serial-PC/v16/Browse.VC.db-shm
+/PC/.vs/Serial-PC/v16/Browse.VC[Konflikt].db
+/PC/.vs/Serial-PC/v16/Browse.VC[Konflikt].db
