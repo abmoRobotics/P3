@@ -29,7 +29,6 @@ public:
     void setPWM(int motorID, float PWM);
     bool dataGatherer();
     double getPositionRad(int motorID);
-    void setPWM(int motorID, float PWM);
     unsigned short CalculateCRC(unsigned short crc_accum, unsigned char *data_blk_ptr, unsigned short data_blk_size);
     double calculateMass(int motorID, double Q1, double Q2, double Q3, double Q4);
     double calculateCoriolis(int motorID, double Q1, double Q2, double Q3, double Q4, double DQ1, double DQ2, double DQ3, double DQ4);
