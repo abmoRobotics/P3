@@ -131,6 +131,13 @@ void arduinoCOM::serialData(byte motorID, byte Instruction, byte param[])
 	char dataToSendArray[30];
 	std::copy(dataToSend.begin(), dataToSend.end(), dataToSendArray);
 	SP->WriteData(dataToSendArray, dataToSend.size());
+
+	byte readData[256]{};
+	byte waitforOK[2]{};
+	while (waitforOK != {0x4F, 0x4B})
+	{
+		waitforOK = SP->ReadData(readData, sizeof(readData));
+	}
 	std::cout << "Data Sent\n";
 }
 

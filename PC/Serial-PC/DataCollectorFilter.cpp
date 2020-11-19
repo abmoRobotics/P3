@@ -246,7 +246,7 @@ void DataCollector::arduinoThread() {
 		}
 		unsigned char array[] { 0xab, 0xac };
 		Arduino.serialData(0x01, 0xaa, array);
-		Sleep(2000);
+		Sleep(20);
 	}
 }
 

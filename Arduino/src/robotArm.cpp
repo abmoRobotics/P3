@@ -32,8 +32,8 @@ int16_t robotArm::getPosition(int motorID)
     float radianPos = ((2 * PI / 4095) * measuredPos);
     char firstByte = (byte)measuredPos;         //
     char secondByte = (byte)(measuredPos >> 8); // Shift 8 bit to left
-    Serial.write(firstByte);                    // Write first byte representing a number from 0-255
-    Serial.write(secondByte);                   // Write second byte representing a number from 256 til noget stort(ca 32000)
+    //Serial.write(firstByte);                    // Write first byte representing a number from 0-255
+    //Serial.write(secondByte);                   // Write second byte representing a number from 256 til noget stort(ca 32000)
     return measuredPos;
 } // Position in radians
 
@@ -265,8 +265,8 @@ double robotArm::ControlSystem(double ref_DQ1, double ref_DQ2, double ref_DQ3, d
     for (size_t i = 0; i < 1; i++)
     {
         torque = ((error[i] * Kp[i] * calculateMass(1, Q1, Q2, Q3, Q4)) + (calculateCoriolis(1, Q1, Q2, Q3, Q4, DQ1, DQ2, DQ3, DQ4) + calculateGravity(1, Q1, Q2, Q3, Q4)));
-        Serial.print("Torque: ");
-        Serial.println(torque);
+        //Serial.print("Torque: ");
+        //Serial.println(torque);
         setTorque(i+1,torque); 
     }
     return torque;
@@ -275,7 +275,7 @@ double robotArm::ControlSystem(double ref_DQ1, double ref_DQ2, double ref_DQ3, d
 
 bool robotArm::dataGatherer()
 {
-    bool debug = true;
+    bool debug = false;
     byte header[5]{};
     byte lenght{};
     Serial.readBytesUntil(0x00, header, 5);
@@ -353,9 +353,7 @@ bool robotArm::dataGatherer()
         
         if (CalcCRC == RecievedCRC)
         {
-            digitalWrite(LED_BUILTIN, HIGH);
-            delay(500);
-            digitalWrite(LED_BUILTIN, LOW);
+            Serial3.write("\nSuccess!");
             for (size_t i = 0; i < sizeof(ReadData) - 2; i++)
             {
                 robotArm::Parameters[i] = Param[i];
