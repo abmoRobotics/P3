@@ -12,19 +12,19 @@ private:
     
    
 public:
-    byte Instruction{};
-    byte MotorID{};
+    char Instruction{};
+    int MotorID{};
     byte Parameters[]{};
 
 
     robotArm(Dynamixel2Arduino &dxl);
     void startMotors();
     double getTorque(int motorID);
-    void setTorque(int motorID, float goalTorque); // Måske ikke lav
+    void setTorque(int motorID, byte goaltorque_ptr[]); // Måske ikke lav
     int16_t getPosition(int motorID);             // Position in radians
     void setPosition(int motorID, int16_t goalPos);  // Måske ikke lav
     double getVelocity(int motorID);
-    void setVelocity(int motorID, int goalVel);
+    void setVelocity(int motorID, byte goalVel_ptr[]);
     double calculatePWM(int motorid, float torque);
     void setPWM(int motorID, float PWM);
     bool dataGatherer();
@@ -36,7 +36,7 @@ public:
     double ControlSystem(double ref_DQ1, double ref_DQ2, double ref_DQ3, double ref_DQ4);
 };
 enum commandList {
-     setTorque = 10,
+     setTorque = 0x10,
      getTorque,
      getPosition,
      setPosition,

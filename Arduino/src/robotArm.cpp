@@ -17,9 +17,11 @@ double robotArm::getTorque(int motorID)
     return measuredTorque; 
 }
 
-void robotArm::setTorque(int motorID, float goalTorque)
+void robotArm::setTorque(int motorID, byte goalTorque_ptr[])
 {
-    dxl->setGoalPWM(motorID, robotArm::calculatePWM(motorID, goalTorque));
+    digitalWrite(LED_BUILTIN, HIGH);
+    float goalPWM = 8.5*((goalTorque_ptr[0] << 8) | goalTorque_ptr[1]);
+    dxl->setGoalPWM(motorID, goalPWM);
 }
 void robotArm::setPWM(int motorID, float PWM)
 {
@@ -99,8 +101,11 @@ double robotArm::calculatePWM(int motorid, float torque)
     return PWM;
 }
 
-void robotArm::setVelocity(int motorID, int goalVel)
+void robotArm::setVelocity(int motorID, byte goalVel_ptr[])
 {
+
+    byte goalVel = (goalVel_ptr[0] << 8) | goalVel_ptr[1];
+
     dxl->setGoalVelocity(motorID, goalVel);
 }
 
@@ -267,7 +272,7 @@ double robotArm::ControlSystem(double ref_DQ1, double ref_DQ2, double ref_DQ3, d
         torque = ((error[i] * Kp[i] * calculateMass(1, Q1, Q2, Q3, Q4)) + (calculateCoriolis(1, Q1, Q2, Q3, Q4, DQ1, DQ2, DQ3, DQ4) + calculateGravity(1, Q1, Q2, Q3, Q4)));
         //Serial.print("Torque: ");
         //Serial.println(torque);
-        setTorque(i+1,torque); 
+        //setTorque(i+1,torque); 
     }
     return torque;
 }
@@ -275,6 +280,7 @@ double robotArm::ControlSystem(double ref_DQ1, double ref_DQ2, double ref_DQ3, d
 
 bool robotArm::dataGatherer()
 {
+    digitalWrite(LED_BUILTIN, LOW);
     bool debug = false;
     byte header[5]{};
     byte lenght{};
@@ -353,18 +359,18 @@ bool robotArm::dataGatherer()
         
         if (CalcCRC == RecievedCRC)
         {
-            Serial3.write("\nSuccess!");
+            //digitalWrite(LED_BUILTIN, HIGH);
             for (size_t i = 0; i < sizeof(ReadData) - 2; i++)
             {
                 robotArm::Parameters[i] = Param[i];
             }
-            robotArm::MotorID = ID;
-            robotArm::Instruction = Instruction;
+            robotArm::MotorID = (int)ID;
+            robotArm::Instruction = (char)Instruction;
             return true;
         }
         else
         {
-            Serial.println("\nDATA WAS CORRUPTED");
+            //Serial.println("\nDATA WAS CORRUPTED");
             return false;
         }
     

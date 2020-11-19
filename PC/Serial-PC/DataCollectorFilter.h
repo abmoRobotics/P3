@@ -79,6 +79,7 @@ private:
 	void getPose();
 	void sendOrientationToArduino();
 	void sendPoseToArduino();
+	void sendGripperToArduino();
 	void arduinoThread();
 public:
 	void startThreads();

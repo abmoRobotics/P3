@@ -243,12 +243,9 @@ void DataCollector::arduinoThread() {
 		if (finishedSetup) {
 			//sendOrientationToArduino();	
 			//sendPoseToArduino();
-			if (fistControlOn)
+			if (myoData[4] > 0)
 			{
-				if (myoData[4] > 0)
-				{
-					sendGripperToArduino();
-				}
+				sendGripperToArduino();
 			}
 			Sleep(10);
 		}
