@@ -20,8 +20,27 @@ double robotArm::getTorque(int motorID)
 void robotArm::setTorque(int motorID, byte goalTorque_ptr[])
 {
     digitalWrite(LED_BUILTIN, HIGH);
-    float goalPWM = 8.5*((goalTorque_ptr[0] << 8) | goalTorque_ptr[1]);
-    dxl->setGoalPWM(motorID, goalPWM);
+    if(goalTorque_ptr[2] == 0x00)
+    {
+        float goalPWM = 8.5*((goalTorque_ptr[0] << 8) | goalTorque_ptr[1]);
+        dxl->setGoalPWM(motorID, goalPWM);
+    }
+    else if(goalTorque_ptr[2] == 0x01)
+    {
+        if(motorID == 5 || motorID == 6)
+        {
+            while(dxl->getPresentPosition(5) > 1900 || dxl->getPresentPosition(6) > 2850)
+            {
+            float goalPWM = (8.5*((goalTorque_ptr[0] << 8) | goalTorque_ptr[1])) * -1;
+            dxl->setGoalPWM(5, -50);
+            dxl->setGoalPWM(6, -50);
+            }
+            dxl->setGoalPWM(5, 0);
+            dxl->setGoalPWM(6, 0);
+
+        }
+    }
+    
 }
 void robotArm::setPWM(int motorID, float PWM)
 {
