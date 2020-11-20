@@ -3,6 +3,7 @@
 #include <string.h>
 #include <sstream>
 #include <vector>
+#include <time.h>
 
 //Ikke lavet (den laver emil og anton i arduino)
 double getTorque()
@@ -131,7 +132,16 @@ void arduinoCOM::serialData(byte motorID, byte Instruction, byte param[])
 	char dataToSendArray[30];
 	std::copy(dataToSend.begin(), dataToSend.end(), dataToSendArray);
 	SP->WriteData(dataToSendArray, dataToSend.size());
+
+	char readData[256]{};
+	byte waitforOK[2]{0x4F, 0x4B};
+	int readResult = 0;
 	std::cout << "Data Sent\n";
+
+	clock_t starttime = clock();
+
+
+	
 }
 
 unsigned short arduinoCOM::CalculateCRC(unsigned short crc_accum, unsigned char* data_blk_ptr, unsigned short data_blk_size)

@@ -11,13 +11,8 @@
 
 class DataCollector : public myo::DeviceListener {
 private:
-	//Thresholds for hver bevælgese (default værdier)
-	int upThreshold = 92;
-	int downThreshold = 87;
-	int outThreshold = 30;
-	int inThreshold = 26;
-	int fistMaxThreshold = 40;
-	int fistMinThreshold = 215;
+	bool allowFist = true;
+	bool allowRead = false;
 
 	//Orientations
 	int roll = 0;
@@ -51,8 +46,8 @@ private:
 	int sampleSize = 100; //200 = 1 sekund, 100 = 0.5 sekund osv.
 
 	int myoData[8]; //myoData som bliver sendt videre til arduino
-	int MaxPods[4][8];
-	int MinPods[4][8];
+	int MaxPods[6][8];
+	int MinPods[6][8];
 	int fistMin[8];
 	int fistMax[8];
 
@@ -79,7 +74,10 @@ private:
 	void getPose();
 	void sendOrientationToArduino();
 	void sendPoseToArduino();
+	void sendGripperToArduino();
 	void arduinoThread();
+	void getFist();
+	void releaseGripper();
 public:
 	void startThreads();
 };

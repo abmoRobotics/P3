@@ -41,16 +41,16 @@ int _tmain(int argc, _TCHAR* argv[])
 	try {
 		std::cout << "Attempting to find a Myo..." << std::endl;
 
-		//myo::Myo* myo = hub.waitForMyo(10000);
+		myo::Myo* myo = hub.waitForMyo(10000);
 
 		// If waitForMyo() returned a null pointer, we failed to find a Myo, so exit with an error message.
-		/*if (!myo) {
+		if (!myo) {
 			throw std::runtime_error("Unable to find a Myo!");
-		}*/
+		}
 
 		std::cout << "Connected to a Myo armband!" << std::endl << std::endl;
 
-		//myo->setStreamEmg(myo::Myo::streamEmgEnabled);
+		myo->setStreamEmg(myo::Myo::streamEmgEnabled);
 
 
 		DataCollector collector;

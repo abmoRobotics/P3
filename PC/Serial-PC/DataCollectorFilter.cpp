@@ -4,19 +4,12 @@
 //Funktionen kaldes når vi modtager et nyt pose fra myo
 void DataCollector::onPose(myo::Myo* myo, uint64_t timestamp, myo::Pose pose) {
 
-	if (pose == pose.doubleTap) {
 
-		//Reset procent hvis den er over 0
-		if (procent > 0) {
-			procent = 0;
-		}
-		//Begynd fistmode hvis procent er 0
-		else if (procent == 0) {
-			fistControlOn = true;
+}
 
-		}
-	}
+void DataCollector::releaseGripper() {
 
+	std::cout << "Hej bocaj" << std::endl;
 }
 
 //Funktionen kører hele tiden og tjekker om man dobbeltapper (Funktionen bliver kaldt i main og startes i et nyt multithread)
@@ -24,10 +17,17 @@ void DataCollector::fistModeTimer() {
 	while (true) {
 		Sleep(10);
 		if (fistControlOn) { //Når man har dobbeltappet
+			allowFist = false; 
+			PlaySound(TEXT("swoosh.wav"), NULL, SND_SYNC);
+			//Sleep(1000);
+			allowRead = true;
 			Sleep(5000);
 			fistControlOn = false;
 			std::cout << "LOCKED" << std::endl;
 			PlaySound(TEXT("targetLocked.wav"), NULL, SND_SYNC);
+			allowRead = false;
+			Sleep(1000);
+			allowFist = true;
 		}
 	}
 }
@@ -80,8 +80,8 @@ void DataCollector::applyFilter() {
 void DataCollector::getPose() {
 
 	//Tjekker hvilken pose der bliver lavet
-	bool movements[4] = {1, 1, 1, 1}; //[up, down, out, in]
-	for (int i = 0; i < 4; i++) { // Kører igennem alle movements
+	bool movements[6] = {1, 1, 1, 1, 1, 1}; //[up, down, out, in, fist, release]
+	for (int i = 0; i < 6; i++) { // Kører igennem alle movements
 		for (int j = 0; j < 8; j++) { // Kører igennem alle filteret pods
 			if (filteredEmg[j] < MinPods[i][j] || filteredEmg[j] > MaxPods[i][j]) { //Hvis pod IKKE er i invervallet
 				movements[i] = false;
@@ -91,19 +91,34 @@ void DataCollector::getPose() {
 
 	//Fixer så flere poses ikke kan være aktive på samme tid
 	//Kører i gennem alle poses, tjekker om de er aktive, og deaktiverer resten
-	for (int i = 0; i < 4; i++) {
+	for (int i = 0; i < 6; i++) {
 		if (movements[i]) {
-			for (int j = 0; j < 4; j++) { //Reset alle movements til 0
+			for (int j = 0; j < 5; j++) { //Reset alle movements til 0
 				movements[j] = false;
 			}
 			movements[i] = true; //Sæt den aktive pose til true igen
 		}
 	}
 
+	if (movements[4] == true && fistControlOn == false && allowFist) {
+
+		//Begynd fistmode hvis procent er 0
+		if (procent == 0) {
+			fistControlOn = true;
+
+		}
+	}
+
+	if (movements[5] == true && procent > 0) {
+		procent = 0;
+		myoData[4] = (int)procent;
+		releaseGripper();
+	}
+
 	//Fist
 	if (fistControlOn) {
 		//Sætter alle "movements" til at være 0	 
-		for (int i = 0; i < 4; i++) {
+		for (int i = 0; i < 6; i++) {
 			movements[i] = 0;
 		}
 
@@ -150,7 +165,7 @@ void DataCollector::getPose() {
 		for (int i = 0; i < 4; i++) {
 			std::cout << " [" << movements[i] << "]";
 		}
-		std::cout << " [" << (int)procent << "%]" << std::endl;
+		std::cout << " [" << myoData[4] << "%]" << std::endl;
 	}
 
 }
@@ -177,8 +192,11 @@ void DataCollector::onEmgData(myo::Myo* myo, uint64_t timestamp, const int8_t* e
 		getPose();
 	}
 
+
+
 	//Indsæt procent i data som skal sendes
-	myoData[4] = (int)procent;
+	if(allowRead)
+		myoData[4] = (int)procent;
 
 	//Print myoData i konsol
 	if (finishedSetup && showMyoData)
@@ -243,11 +261,27 @@ void DataCollector::arduinoThread() {
 		if (finishedSetup) {
 			//sendOrientationToArduino();	
 			//sendPoseToArduino();
+			if (fistControlOn)
+			{
+				if (myoData[4] > 0)
+				{
+					sendGripperToArduino();
+				}
+			}
+			Sleep(10);
 		}
-		unsigned char array[] { 0xab, 0xac };
-		Arduino.serialData(0x01, 0xaa, array);
-		Sleep(2000);
+		
 	}
+}
+void DataCollector::sendGripperToArduino()
+{
+	byte Instruction = 0x10;
+	byte params[2]{};
+	int torque = myoData[4];
+	params[1] = torque & 0xff;
+	params[0] = (torque >> 8);
+	Arduino.serialData(0x05, Instruction, params);
+	Arduino.serialData(0x06, Instruction, params);
 }
 
 //Sender pose til arduino (up, down, out, in)
@@ -270,6 +304,7 @@ void DataCollector::sendPoseToArduino()
 	}
 	Sleep(50);
 }
+
 
 //Sender orientationen til arduino
 void DataCollector::sendOrientationToArduino()
@@ -300,8 +335,8 @@ void DataCollector::sendOrientationToArduino()
 
 //Start threads when constructed
 void DataCollector::startThreads() {
-	//std::thread t(&DataCollector::setupMyo2, this);
-	//std::thread t2(&DataCollector::fistModeTimer, this);
+	std::thread t(&DataCollector::setupMyo, this);
+	std::thread t2(&DataCollector::fistModeTimer, this);
 	std::thread t3(&DataCollector::arduinoThread, this);
 	t3.join();
 }
@@ -342,7 +377,7 @@ void DataCollector::setupMyo(){
 	T = T_calibration; //Sæt Tidskonstanten lig før kalibrering (Filteringen tager længere tid, men spiker ikke så meget)
 
 	//Kører igennem 4 poses og modtager max & min værdier for hver pod
-	for(int i = 0; i < 4; i++){
+	for(int i = 0; i < 6; i++){
 
 		//vent på brugeren trykker
 		std::cout << "Perform pose " << i << std::endl;

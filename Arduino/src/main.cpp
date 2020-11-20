@@ -23,16 +23,14 @@ void setup()
 
 void loop()
 {
- robot->dataGatherer();
-uint8_t command = robot->Instruction;
-uint8_t motorID = robot->MotorID;
+
   //int16_t Value = Data[2] + (Data[3] << 8);
 //  robot->setTorque(1, -1.3699);
   //robot->setTorque(2, -0.0087);
   //robot->setTorque(3, -0.0980);
   //robot->setTorque(4, 0); 
   
-  robot->ControlSystem(-0.3, 0, 0, 0);
+  //robot->ControlSystem(-0.3, 0, 0, 0);
 
   //double a =  robot->ControlSystem(0, 0, 0, 0); 
  //double a = robot->getPositionRad(3);
@@ -47,6 +45,8 @@ uint8_t motorID = robot->MotorID;
 
 
   if (robot->dataGatherer()){
+  char command = robot->Instruction;
+  int motorID = robot->MotorID;
     if(command == commandList::setPosition)
     {
       robot->setPosition(motorID, robot->Parameters[1]);//Ændre tallet når vi lige finder ud af det
@@ -65,7 +65,7 @@ uint8_t motorID = robot->MotorID;
 
     else if(command == commandList::setVelocity)
     {
-      robot->setVelocity(motorID, robot->Parameters[1]); //Ændre tallet når vi lige finder ud af det
+      robot->setVelocity(motorID, robot->Parameters); //Ændre tallet når vi lige finder ud af det
     }
 
     else if (command == commandList::getTorque)
@@ -75,7 +75,7 @@ uint8_t motorID = robot->MotorID;
     
     else if (command == commandList::setTorque)
     {
-      robot->setTorque(motorID, robot->Parameters[1]);//Ændre tallet når vi lige finder ud af det
+      robot->setTorque(motorID, robot->Parameters);//Ændre tallet når vi lige finder ud af det
     }
     
   }

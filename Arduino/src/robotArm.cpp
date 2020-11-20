@@ -17,9 +17,30 @@ double robotArm::getTorque(int motorID)
     return measuredTorque; 
 }
 
-void robotArm::setTorque(int motorID, float goalTorque)
+void robotArm::setTorque(int motorID, byte goalTorque_ptr[])
 {
-    dxl->setGoalPWM(motorID, robotArm::calculatePWM(motorID, goalTorque));
+    digitalWrite(LED_BUILTIN, HIGH);
+    if(goalTorque_ptr[2] == 0x00)
+    {
+        float goalPWM = 8.5*((goalTorque_ptr[0] << 8) | goalTorque_ptr[1]);
+        dxl->setGoalPWM(motorID, goalPWM);
+    }
+    else if(goalTorque_ptr[2] == 0x01)
+    {
+        if(motorID == 5 || motorID == 6)
+        {
+            while(dxl->getPresentPosition(5) > 1900 || dxl->getPresentPosition(6) > 2850)
+            {
+            float goalPWM = (8.5*((goalTorque_ptr[0] << 8) | goalTorque_ptr[1])) * -1;
+            dxl->setGoalPWM(5, -50);
+            dxl->setGoalPWM(6, -50);
+            }
+            dxl->setGoalPWM(5, 0);
+            dxl->setGoalPWM(6, 0);
+
+        }
+    }
+    
 }
 
 void robotArm::setPWM(int motorID, float PWM)
@@ -100,8 +121,11 @@ double robotArm::calculatePWM(int motorid, float torque)
     return PWM;
 }
 
-void robotArm::setVelocity(int motorID, int goalVel)
+void robotArm::setVelocity(int motorID, byte goalVel_ptr[])
 {
+
+    byte goalVel = (goalVel_ptr[0] << 8) | goalVel_ptr[1];
+
     dxl->setGoalVelocity(motorID, goalVel);
 }
 
@@ -265,9 +289,9 @@ double robotArm::ControlSystem(double ref_DQ1, double ref_DQ2, double ref_DQ3, d
     for (size_t i = 0; i < 1; i++)
     {
         torque = ((error[i] * Kp[i] * calculateMass(1, Q1, Q2, Q3, Q4)) + (calculateCoriolis(1, Q1, Q2, Q3, Q4, DQ1, DQ2, DQ3, DQ4) + calculateGravity(1, Q1, Q2, Q3, Q4)));
-        Serial.print("Torque: ");
-        Serial.println(torque);
-        setTorque(i+1,torque); 
+        //Serial.print("Torque: ");
+        //Serial.println(torque);
+        //setTorque(i+1,torque); 
     }
     return torque;
 }
@@ -375,7 +399,8 @@ void robotArm::MotorConstants(int motorID)
 
 bool robotArm::dataGatherer()
 {
-    bool debug = true;
+    digitalWrite(LED_BUILTIN, LOW);
+    bool debug = false;
     byte header[5]{};
     byte lenght{};
     Serial.readBytesUntil(0x00, header, 5);
@@ -453,20 +478,18 @@ bool robotArm::dataGatherer()
         
         if (CalcCRC == RecievedCRC)
         {
-            digitalWrite(LED_BUILTIN, HIGH);
-            delay(500);
-            digitalWrite(LED_BUILTIN, LOW);
+            //digitalWrite(LED_BUILTIN, HIGH);
             for (size_t i = 0; i < sizeof(ReadData) - 2; i++)
             {
                 robotArm::Parameters[i] = Param[i];
             }
-            robotArm::MotorID = ID;
-            robotArm::Instruction = Instruction;
+            robotArm::MotorID = (int)ID;
+            robotArm::Instruction = (char)Instruction;
             return true;
         }
         else
         {
-            Serial.println("\nDATA WAS CORRUPTED");
+            //Serial.println("\nDATA WAS CORRUPTED");
             return false;
         }
     
