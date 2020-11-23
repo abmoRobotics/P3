@@ -25,7 +25,7 @@ void loop()
 {
 
   //int16_t Value = Data[2] + (Data[3] << 8);
-  robot->setTorque2(1, -1.7, -0.2);
+  //robot->setTorque2(1, -1.7, -0.2);
   //robot->setTorque(2, -0.0087);
   //robot->setTorque(3, -0.0980);
   //robot->setTorque(4, 0); 
