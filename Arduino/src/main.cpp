@@ -7,7 +7,7 @@
 
  Dynamixel2Arduino dxl(DXL_SERIAL, 2);
  robotArm* robot;
-
+int indexe = 0;
 void setup()
 {
   Serial.begin(115200);
@@ -25,12 +25,15 @@ void loop()
 {
 
   //int16_t Value = Data[2] + (Data[3] << 8);
-//  robot->setTorque(1, -1.3699);
+  robot->setTorque2(1, -1.7, -0.2);
   //robot->setTorque(2, -0.0087);
   //robot->setTorque(3, -0.0980);
   //robot->setTorque(4, 0); 
-  
+   
+    
   //robot->ControlSystem(-0.3, 0, 0, 0);
+
+ 
 
   //double a =  robot->ControlSystem(0, 0, 0, 0); 
  //double a = robot->getPositionRad(3);

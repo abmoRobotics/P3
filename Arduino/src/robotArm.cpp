@@ -42,6 +42,14 @@ void robotArm::setTorque(int motorID, byte goalTorque_ptr[])
     }
     
 }
+
+void robotArm::setTorque2(int motorID, float torque, float angularVel){
+    float Q = getPositionRad(motorID);
+    float PWM = calculatePWM(motorID, torque, angularVel, Q);
+    dxl->setGoalPWM(motorID,PWM);
+}
+
+
 void robotArm::setPWM(int motorID, float PWM)
 {
     dxl->setGoalPWM(motorID, PWM);
@@ -99,23 +107,37 @@ double robotArm::getVelocity(int motorID)
     return measuredVel;
 }
 
-double robotArm::calculatePWM(int motorid, float torque)
+double robotArm::calculatePWM(int motorid, float torque, float angularVel, float Q)
 {
     int PWM;
-    float C1MX28{538.42}, C2MX28{149.78}, C1MX64{197.71}, C2MX64{124.29}, C1MX106{120.66}, C2MX106{165.78};
-    float angularVel = dxl->getPresentVelocity(motorid) * 0.229 * 0.104719755;
+    float C2MX28{115.2662};
+    float C2MX64{105.3303};
+    float C2MX106{160.6181};
+    float C1MX28[3] = {642.9920, 427.3706, 211.7492}; // [0]: positive [1]: stand still [2]: negative rotation
+    float C1MX64[3] = {224.4644, 152.6855, 80.9066};
+    float C1MX106[3] = {127.5108, 83.9591, 40.4073};
+
+    int state = 0;
+    if (Q < PI/2){
+        state = 2;
+    }
+    else if (Q > PI/2){
+        state = 0;
+    }
+    
+
 
     if (motorid == 1 || motorid == 2)
     {
-        PWM = torque * C1MX106 + angularVel * C2MX106;
+        PWM = torque * C1MX106[state] + angularVel * C2MX106;
     }
     else if (motorid == 3)
     {
-        PWM = torque * C1MX64 + angularVel * C2MX64;
+        PWM = torque * C1MX64[state] + angularVel * C2MX64;
     }
     else if (motorid == 4 || motorid == 5 || motorid == 6)
     {
-        PWM = torque * C1MX28 + angularVel * C2MX28;
+        PWM = torque * C1MX28[state] + angularVel * C2MX28;
     }
     return PWM;
 }
@@ -190,40 +212,40 @@ return M;
 }
 
 double robotArm::calculateCoriolis(int motorID, double Q1, double Q2, double Q3, double Q4, double DQ1, double DQ2, double DQ3, double DQ4){
-double t2 = cos(Q1);
-double t3 = cos(Q2);
-double t4 = cos(Q3);
-double t5 = cos(Q4);
-double t6 = sin(Q1);
-double t7 = sin(Q2);
-double t8 = sin(Q3);
-double t9 = sin(Q4);
-double t10 = DQ1*DQ1;
-double t11 = DQ3*DQ3;
-double t12 = DQ4*DQ4;
-double t13 = Q3*2.0;
-double t14 = t2*t2;
-double t15 = t3*t3;
-double t16 = t4*t4;
-double t17 = t6*t6;
-double t18 = t7*t7;
-double t19 = t8*t8;
-double t20 = sin(t13);
-double t21 = t2*t3*t10*5.7253326992E-3;
-double t22 = t6*t7*t10*5.7253326992E-3;
-double t23 = t4*t6*t7*t9*t10*7.662710064E-4;
-double t24 = t5*t6*t7*t8*t10*7.662710064E-4;
-double t25 = t2*t4*t6*t9*t10*1.77795583512E-3;
-double t26 = t2*t5*t6*t8*t10*1.77795583512E-3;
-double t27 = t2*t3*t4*t6*t9*t10*6.834308976E-4;
-double t28 = t2*t3*t5*t6*t8*t10*6.834308976E-4;
-double t29 = t2*t3*t7*t8*t9*t10*7.662710064E-4;
-double t32 = t2*t3*t4*t5*t7*t10*7.662710064E-4;
-double t30 = t3*t4*t5*t10*t14*1.77795583512E-3;
-double t31 = t3*t8*t9*t10*t14*1.77795583512E-3;
-double t33 = t3*t4*t5*t7*t10*t14*6.834308976E-4;
-double t34 = t3*t7*t8*t9*t10*t14*6.834308976E-4;
-double V;
+    double t2 = cos(Q1);
+    double t3 = cos(Q2);
+    double t4 = cos(Q3);
+    double t5 = cos(Q4);
+    double t6 = sin(Q1);
+    double t7 = sin(Q2);
+    double t8 = sin(Q3);
+    double t9 = sin(Q4);
+    double t10 = DQ1*DQ1;
+    double t11 = DQ3*DQ3;
+    double t12 = DQ4*DQ4;
+    double t13 = Q3*2.0;
+    double t14 = t2*t2;
+    double t15 = t3*t3;
+    double t16 = t4*t4;
+    double t17 = t6*t6;
+    double t18 = t7*t7;
+    double t19 = t8*t8;
+    double t20 = sin(t13);
+    double t21 = t2*t3*t10*5.7253326992E-3;
+    double t22 = t6*t7*t10*5.7253326992E-3;
+    double t23 = t4*t6*t7*t9*t10*7.662710064E-4;
+    double t24 = t5*t6*t7*t8*t10*7.662710064E-4;
+    double t25 = t2*t4*t6*t9*t10*1.77795583512E-3;
+    double t26 = t2*t5*t6*t8*t10*1.77795583512E-3;
+    double t27 = t2*t3*t4*t6*t9*t10*6.834308976E-4;
+    double t28 = t2*t3*t5*t6*t8*t10*6.834308976E-4;
+    double t29 = t2*t3*t7*t8*t9*t10*7.662710064E-4;
+    double t32 = t2*t3*t4*t5*t7*t10*7.662710064E-4;
+    double t30 = t3*t4*t5*t10*t14*1.77795583512E-3;
+    double t31 = t3*t8*t9*t10*t14*1.77795583512E-3;
+    double t33 = t3*t4*t5*t7*t10*t14*6.834308976E-4;
+    double t34 = t3*t7*t8*t9*t10*t14*6.834308976E-4;
+    double V;
     if (motorID==1)
     {
         V = t10*-1.438251E-5+t21+t22+t10*sin(Q1*2.0)*5.702252365165001E-4+t3*t10*1.927698669E-6-t6*t10*1.3519085382E-3-t7*t10*8.13284882E-7+t10*t14*2.876502E-5+t3*t24-(DQ2*DQ2)*t7*7.23795776E-5-DQ1*DQ3*3.76295165104E-3-DQ1*DQ2*t2*1.451710392E-4+DQ1*DQ3*t4*6.27358637862E-3-DQ1*DQ3*t8*3.3683604636E-4+DQ1*DQ3*t9*3.55591167024E-3-DQ1*DQ4*t9*3.55591167024E-3+DQ1*DQ2*t14*1.7634261572E-5+DQ1*DQ3*t14*3.76295165104E-3+DQ1*DQ3*t16*7.52590330208E-3+DQ1*DQ3*t20*1.290494052896E-3-t3*t4*t11*1.3519085382E-3-t4*t5*t10*1.77795583512E-3+t3*t8*t10*1.556647653E-5-t4*t6*t11*3.13679318931E-3+t4*t7*t10*4.654444249400001E-5+t5*t6*t10*8.108864944E-4+t3*t8*t11*7.25855196E-5+t3*t9*t10*1.77795583512E-3-t2*t9*t12*1.88147582552E-3-t5*t6*t12*7.232230896E-4+t6*t8*t11*1.6841802318E-4+t7*t8*t10*6.0E-11+t7*t9*t10*7.232230896E-4-t3*t10*t14*3.855397338E-6-t8*t9*t10*1.77795583512E-3+t7*t9*t12*8.108864944E-4+t3*t10*t16*1.88147582552E-3+t6*t10*t15*1.3519085382E-3+t7*t10*t14*1.626569764E-6+t2*t3*t4*t10*7.25855196E-5+t2*t3*t5*t10*7.662710064E-4+t2*t3*t6*t10*3.3683604636E-4+t2*t4*t6*t10*3.3683604636E-4+t3*t4*t5*t10*6.834308976E-4+t2*t3*t8*t10*1.3519085382E-3+t2*t5*t6*t10*5.00235784944E-3+t2*t6*t7*t10*6.27358637862E-3+t3*t4*t8*t10*1.290494052896E-3+t2*t6*t8*t10*6.27358637862E-3-t3*t6*t7*t10*7.25855196E-5-t4*t5*t6*t11*6.834308976E-4+t4*t5*t7*t10*6.834308976E-4-t3*t5*t8*t12*8.108864944E-4+t2*t7*t9*t12*7.232230896E-4+t3*t8*t9*t10*6.834308976E-4-t5*t6*t8*t12*1.88147582552E-3+t2*t6*t10*t15*1.558837051911E-3+t4*t5*t10*t14*3.55591167024E-3-t2*t6*t10*t16*1.290494052896E-3-t6*t8*t9*t11*6.834308976E-4+t7*t8*t9*t10*2.56490672312E-3-t3*t8*t10*t14*3.113295306E-5-t4*t7*t10*t14*9.308888498800001E-5-t3*t9*t10*t14*3.55591167024E-3-t5*t6*t10*t15*8.108864944E-4-t3*t9*t10*t16*1.77795583512E-3+t6*t8*t10*t15*6.7089066E-6-t7*t8*t10*t14*1.2E-10+t6*t9*t10*t15*7.662710064E-4-t7*t9*t10*t14*1.4464461792E-3+t8*t9*t10*t14*3.55591167024E-3-t3*t10*t14*t16*3.76295165104E-3+t6*t10*t15*t16*8.108864944E-4-DQ1*DQ2*t2*t3*1.14506653984E-2-DQ1*DQ2*t2*t4*1.34178132E-5-DQ2*DQ3*t2*t3*8.13284882E-7+DQ2*DQ4*t2*t3*1.423693332896E-3-DQ1*DQ3*t3*t6*1.6217729888E-3+DQ1*DQ3*t4*t5*1.3668617952E-3-DQ1*DQ4*t4*t5*1.3668617952E-3-DQ2*DQ3*t2*t7*1.927698669E-6-DQ2*DQ4*t3*t5*8.108864944E-4-DQ1*DQ2*t6*t7*1.14506653984E-2+DQ1*DQ4*t2*t9*1.6217729888E-3+DQ2*DQ3*t4*t7*7.25855196E-5-DQ3*DQ4*t4*t6*6.0E-11+DQ1*DQ2*t2*t15*2.903420784E-4-DQ1*DQ2*t3*t14*6.27358637862E-3+DQ2*DQ3*t7*t8*1.3519085382E-3-DQ1*DQ2*t4*t14*1.2E-10+DQ1*DQ3*t8*t9*1.3668617952E-3+DQ3*DQ4*t6*t8*6.211091902400001E-5-DQ1*DQ3*t4*t14*6.27358637862E-3-DQ1*DQ4*t8*t9*1.3668617952E-3+DQ1*DQ2*t7*t14*3.3683604636E-4+DQ1*DQ2*t8*t14*1.24221838048E-4+DQ1*DQ3*t8*t14*3.3683604636E-4-DQ1*DQ3*t9*t14*3.55591167024E-3+DQ1*DQ4*t9*t14*5.00235784944E-3-DQ1*DQ3*t9*t16*7.11182334048E-3+DQ1*DQ4*t9*t16*3.55591167024E-3-DQ1*DQ2*t14*t15*3.526852314399999E-5-DQ1*DQ3*t14*t16*7.52590330208E-3+DQ1*DQ2*t2*t3*t6*1.626569764E-6+DQ1*DQ2*t2*t3*t7*5.4076341528E-3+DQ1*DQ3*t2*t3*t6*2.580988105792E-3-DQ2*DQ4*t2*t3*t5*7.232230896E-4-DQ3*DQ4*t2*t3*t4*6.211091902400001E-5+DQ1*DQ3*t3*t4*t6*2.7038170764E-3-DQ1*DQ2*t2*t4*t9*1.5325420128E-3+DQ1*DQ2*t2*t5*t8*1.5325420128E-3+DQ1*DQ2*t2*t6*t7*3.855397338E-6+DQ2*DQ3*t2*t3*t9*7.232230896E-4-DQ2*DQ4*t2*t4*t7*6.0E-11-DQ1*DQ2*t4*t6*t7*1.451710392E-4-DQ3*DQ4*t2*t3*t8*6.0E-11-DQ1*DQ2*t5*t6*t7*1.5325420128E-3-DQ1*DQ3*t3*t6*t8*1.451710392E-4+DQ1*DQ3*t4*t5*t8*7.11182334048E-3+DQ3*DQ4*t2*t5*t7*7.232230896E-4+DQ1*DQ2*t2*t8*t9*1.6217729888E-3+DQ1*DQ3*t3*t6*t9*1.5325420128E-3-DQ1*DQ4*t4*t5*t8*3.55591167024E-3+DQ3*DQ4*t4*t5*t6*6.834308976E-4-DQ1*DQ4*t3*t6*t9*1.5325420128E-3+DQ2*DQ4*t2*t7*t8*6.211091902400001E-5-DQ3*DQ4*t3*t4*t9*8.108864944E-4+DQ1*DQ2*t2*t4*t15*2.68356264E-5-DQ1*DQ2*t6*t7*t8*2.7038170764E-3+DQ1*DQ2*t3*t5*t14*3.76295165104E-3-DQ1*DQ3*t2*t4*t15*1.34178132E-5+DQ1*DQ3*t2*t5*t15*1.5325420128E-3-DQ3*DQ4*t4*t6*t9*1.88147582552E-3+DQ1*DQ2*t3*t7*t14*3.117674103822E-3-DQ1*DQ3*t4*t5*t14*1.3668617952E-3-DQ1*DQ4*t2*t5*t15*1.5325420128E-3+DQ1*DQ4*t4*t5*t14*1.3668617952E-3+DQ1*DQ3*t3*t6*t16*3.2435459776E-3-DQ1*DQ2*t4*t9*t14*1.3668617952E-3+DQ1*DQ2*t5*t8*t14*1.3668617952E-3-DQ1*DQ3*t4*t8*t14*2.580988105792E-3+DQ2*DQ4*t7*t8*t9*8.108864944E-4+DQ3*DQ4*t6*t8*t9*6.834308976E-4-DQ1*DQ4*t2*t9*t15*1.6217729888E-3-DQ1*DQ3*t8*t9*t14*1.3668617952E-3-DQ1*DQ4*t7*t9*t14*3.76295165104E-3+DQ1*DQ2*t4*t14*t15*2.4E-10+DQ1*DQ4*t8*t9*t14*1.3668617952E-3-DQ1*DQ2*t8*t14*t15*2.48443676096E-4+DQ1*DQ3*t9*t14*t16*7.11182334048E-3-DQ1*DQ4*t9*t14*t15*1.4464461792E-3-DQ1*DQ4*t9*t14*t16*3.55591167024E-3+t2*t3*t4*t8*t10*8.108864944E-4+t2*t3*t6*t7*t10*1.7634261572E-5-t2*t4*t5*t7*t10*7.662710064E-4+t2*t3*t4*t9*t11*6.834308976E-4-t2*t3*t5*t8*t11*6.834308976E-4+t2*t4*t6*t8*t10*3.76295165104E-3-t2*t5*t6*t7*t10*3.76295165104E-3+t3*t4*t5*t8*t10*1.77795583512E-3-t3*t4*t6*t7*t10*6.7089066E-6-t2*t4*t6*t9*t10*1.3668617952E-3+t2*t5*t6*t8*t10*1.3668617952E-3-t2*t3*t5*t10*t16*7.662710064E-4-t2*t7*t8*t9*t10*7.662710064E-4-t3*t4*t5*t10*t14*1.3668617952E-3-t2*t5*t6*t10*t15*1.4464461792E-3-t2*t5*t6*t10*t16*3.55591167024E-3-t3*t4*t8*t10*t14*2.580988105792E-3-t4*t5*t7*t10*t14*1.3668617952E-3-t3*t8*t9*t10*t14*1.3668617952E-3-t7*t8*t9*t10*t14*5.12981344624E-3-t2*t6*t10*t15*t16*1.290494052896E-3+t3*t9*t10*t14*t16*3.55591167024E-3-t6*t9*t10*t15*t16*7.662710064E-4-t2*t3*t4*t6*t7*t10*1.2E-10+t2*t3*t4*t6*t9*t10*3.55591167024E-3-t2*t3*t5*t6*t8*t10*3.55591167024E-3-t2*t3*t4*t8*t9*t10*7.662710064E-4+t2*t3*t6*t7*t8*t10*1.24221838048E-4-t2*t4*t6*t8*t9*t10*3.55591167024E-3-t3*t4*t6*t7*t9*t10*7.662710064E-4+t3*t6*t7*t8*t9*t10*8.108864944E-4-t3*t4*t5*t8*t10*t14*3.55591167024E-3+t4*t5*t6*t8*t10*t15*7.662710064E-4-DQ1*DQ2*t2*t3*t4*t6*9.308888498800001E-5-DQ1*DQ3*t2*t3*t4*t6*3.113295306E-5-DQ1*DQ2*t2*t3*t5*t7*3.2435459776E-3+DQ1*DQ3*t2*t3*t5*t6*3.55591167024E-3-DQ1*DQ2*t3*t4*t5*t6*1.5325420128E-3-DQ1*DQ4*t2*t3*t5*t6*3.55591167024E-3-DQ1*DQ2*t2*t3*t6*t8*1.2E-10-DQ1*DQ2*t2*t3*t6*t9*1.4464461792E-3+DQ1*DQ2*t2*t3*t7*t8*2.68356264E-5-DQ1*DQ3*t2*t4*t6*t7*1.2E-10-DQ2*DQ3*t2*t4*t5*t7*6.834308976E-4+DQ1*DQ2*t2*t3*t7*t9*3.0650840256E-3-DQ1*DQ3*t2*t3*t7*t8*1.34178132E-5+DQ1*DQ3*t2*t4*t6*t9*3.55591167024E-3-DQ1*DQ3*t2*t5*t6*t8*3.55591167024E-3-DQ1*DQ4*t2*t5*t6*t7*1.4464461792E-3-DQ3*DQ4*t2*t3*t4*t9*6.834308976E-4+DQ3*DQ4*t2*t3*t5*t8*6.834308976E-4+DQ1*DQ2*t2*t6*t7*t8*3.113295306E-5-DQ1*DQ4*t2*t4*t6*t9*3.55591167024E-3+DQ1*DQ4*t2*t5*t6*t8*3.55591167024E-3+DQ1*DQ2*t2*t6*t7*t9*3.55591167024E-3+DQ1*DQ3*t2*t6*t7*t8*9.308888498800001E-5-DQ1*DQ2*t4*t6*t7*t8*1.6217729888E-3-DQ1*DQ2*t3*t6*t8*t9*1.5325420128E-3+DQ1*DQ3*t3*t4*t5*t14*3.55591167024E-3-DQ1*DQ3*t4*t6*t7*t9*1.5325420128E-3+DQ1*DQ3*t5*t6*t7*t8*1.5325420128E-3+DQ1*DQ2*t2*t3*t7*t16*3.2435459776E-3-DQ1*DQ3*t2*t3*t6*t16*5.161976211584E-3-DQ1*DQ4*t3*t4*t5*t14*3.55591167024E-3+DQ1*DQ4*t4*t6*t7*t9*1.5325420128E-3-DQ1*DQ4*t5*t6*t7*t8*1.5325420128E-3-DQ2*DQ3*t2*t7*t8*t9*6.834308976E-4-DQ1*DQ2*t3*t5*t7*t14*2.8928923584E-3-DQ1*DQ3*t3*t4*t7*t14*1.24221838048E-4+DQ1*DQ2*t2*t4*t9*t15*3.0650840256E-3-DQ1*DQ2*t2*t5*t8*t15*3.0650840256E-3+DQ1*DQ3*t2*t4*t8*t15*3.2435459776E-3+DQ1*DQ2*t2*t6*t7*t16*3.76295165104E-3-DQ1*DQ3*t4*t5*t8*t14*7.11182334048E-3-DQ1*DQ3*t3*t7*t8*t14*1.2E-10+DQ1*DQ4*t4*t5*t8*t14*3.55591167024E-3-DQ1*DQ2*t2*t8*t9*t15*3.2435459776E-3+DQ1*DQ2*t4*t7*t9*t14*3.55591167024E-3+DQ1*DQ2*t5*t6*t7*t16*1.5325420128E-3-DQ1*DQ2*t5*t7*t8*t14*3.55591167024E-3-DQ1*DQ3*t3*t6*t9*t16*3.0650840256E-3+DQ1*DQ3*t3*t8*t9*t14*3.55591167024E-3+DQ1*DQ4*t3*t6*t9*t16*1.5325420128E-3-DQ1*DQ4*t3*t8*t9*t14*3.55591167024E-3-DQ1*DQ3*t2*t5*t15*t16*3.0650840256E-3-DQ1*DQ2*t3*t7*t14*t16*2.580988105792E-3+DQ1*DQ4*t2*t5*t15*t16*1.5325420128E-3+DQ1*DQ2*t4*t9*t14*t15*2.7337235904E-3-DQ1*DQ2*t5*t8*t14*t15*2.7337235904E-3-DQ1*DQ3*t4*t8*t14*t15*2.580988105792E-3-DQ1*DQ2*t2*t3*t4*t5*t6*1.3668617952E-3-DQ1*DQ3*t2*t3*t4*t5*t7*1.5325420128E-3+DQ1*DQ4*t2*t3*t4*t5*t7*1.5325420128E-3+DQ1*DQ2*t2*t4*t5*t6*t7*1.3668617952E-3+DQ1*DQ3*t2*t3*t4*t6*t8*7.52590330208E-3-DQ1*DQ3*t2*t3*t4*t6*t9*1.3668617952E-3+DQ1*DQ3*t2*t3*t5*t6*t8*1.3668617952E-3-DQ1*DQ3*t2*t3*t4*t7*t9*1.6217729888E-3+DQ1*DQ4*t2*t3*t4*t6*t9*1.3668617952E-3-DQ1*DQ4*t2*t3*t5*t6*t8*1.3668617952E-3+DQ1*DQ2*t2*t4*t6*t7*t8*2.580988105792E-3+DQ1*DQ3*t3*t4*t5*t6*t8*3.0650840256E-3-DQ1*DQ4*t2*t3*t5*t7*t8*1.6217729888E-3-DQ1*DQ2*t2*t3*t6*t8*t9*5.12981344624E-3-DQ1*DQ4*t3*t4*t5*t6*t8*1.5325420128E-3-DQ1*DQ3*t2*t4*t6*t7*t9*5.12981344624E-3+DQ1*DQ3*t2*t5*t6*t7*t8*1.3668617952E-3-DQ1*DQ3*t2*t3*t7*t8*t9*1.5325420128E-3+DQ1*DQ4*t2*t4*t6*t7*t9*1.3668617952E-3-DQ1*DQ4*t2*t5*t6*t7*t8*5.12981344624E-3+DQ1*DQ4*t2*t3*t7*t8*t9*1.5325420128E-3+DQ1*DQ2*t2*t6*t7*t8*t9*1.3668617952E-3-DQ1*DQ3*t2*t3*t5*t6*t16*7.11182334048E-3+DQ1*DQ2*t4*t6*t7*t8*t9*1.5325420128E-3-DQ1*DQ3*t3*t4*t5*t7*t14*1.3668617952E-3+DQ1*DQ4*t2*t3*t5*t6*t16*3.55591167024E-3+DQ1*DQ4*t3*t4*t5*t7*t14*1.3668617952E-3-DQ1*DQ2*t2*t3*t7*t9*t16*3.0650840256E-3-DQ1*DQ3*t2*t4*t8*t9*t15*3.0650840256E-3-DQ1*DQ2*t2*t6*t7*t9*t16*3.55591167024E-3+DQ1*DQ4*t2*t4*t8*t9*t15*1.5325420128E-3-DQ1*DQ3*t3*t7*t8*t9*t14*1.3668617952E-3+DQ1*DQ4*t3*t7*t8*t9*t14*1.3668617952E-3-t2*t3*t4*t6*t7*t9*t10*1.3668617952E-3+t2*t3*t5*t6*t7*t8*t10*1.3668617952E-3+DQ1*DQ2*t2*t3*t4*t5*t7*t8*3.0650840256E-3+DQ1*DQ2*t2*t4*t5*t6*t7*t8*3.55591167024E-3-DQ1*DQ3*t2*t3*t4*t6*t8*t9*7.11182334048E-3+DQ1*DQ4*t2*t3*t4*t6*t8*t9*3.55591167024E-3;
@@ -245,15 +267,15 @@ return V;
     
 
 double robotArm::calculateGravity(int motorID, double Q1, double Q2, double Q3, double Q4){
-double t2 = cos(Q1);
-double t3 = cos(Q2);
-double t4 = cos(Q3);
-double t5 = cos(Q4);
-double t6 = sin(Q1);
-double t7 = sin(Q2);
-double t8 = sin(Q3);
-double t9 = sin(Q4);
-double G;
+    double t2 = cos(Q1);
+    double t3 = cos(Q2);
+    double t4 = cos(Q3);
+    double t5 = cos(Q4);
+    double t6 = sin(Q1);
+    double t7 = sin(Q2);
+    double t8 = sin(Q3);
+    double t9 = sin(Q4);
+    double G;
    if (motorID==1)
     {
         G = t2*-1.27196840191+t2*t4*9.632294628E-3+t2*t8*7.7715683274E-2+t6*t7*8.71467553E-3-t2*t4*t5*1.07606829392E-1+t3*t4*t6*7.7715683274E-2-t3*t6*t8*9.632294628E-3-t6*t7*t9*1.07606829392E-1+t3*t5*t6*t8*1.07606829392E-1;
@@ -274,7 +296,7 @@ double G;
 }
 
 double robotArm::ControlSystem(double ref_DQ1, double ref_DQ2, double ref_DQ3, double ref_DQ4){
-    double Kp[4] = {100, 10, 10, 10};
+    double Kp[4] = {10, 10, 10, 10};
     double Q1 = getPositionRad(1);
     double Q2 = getPositionRad(2);
     double Q3 = getPositionRad(3);
@@ -289,11 +311,11 @@ double robotArm::ControlSystem(double ref_DQ1, double ref_DQ2, double ref_DQ3, d
     for (size_t i = 0; i < 1; i++)
     {
         torque = ((error[i] * Kp[i] * calculateMass(1, Q1, Q2, Q3, Q4)) + (calculateCoriolis(1, Q1, Q2, Q3, Q4, DQ1, DQ2, DQ3, DQ4) + calculateGravity(1, Q1, Q2, Q3, Q4)));
-        //Serial.print("Torque: ");
-        //Serial.println(torque);
-        //setTorque(i+1,torque); 
+
+        setTorque2(i+1,torque,ref_DQ1); 
     }
-    return torque;
+  // Virker ikke i negativ retning efter ca. 20 grader
+    return Q1;
 }
 
 
@@ -303,7 +325,7 @@ bool robotArm::dataGatherer()
     bool debug = false;
     byte header[5]{};
     byte lenght{};
-    Serial.readBytesUntil(0x00, header, 5);
+    //Serial.readBytesUntil(0x00, header, 5);
     if (header[0] == 0xFF && header[1] == 0xFF && header[2] == 0xFD && header[4] == 0x00)
     {
         int starttime = micros();

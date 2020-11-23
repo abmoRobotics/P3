@@ -25,8 +25,9 @@ public:
     void setPosition(int motorID, int16_t goalPos);  // Måske ikke lav
     double getVelocity(int motorID);
     void setVelocity(int motorID, byte goalVel_ptr[]);
-    double calculatePWM(int motorid, float torque);
+    double calculatePWM(int motorid, float torque, float angularVel, float Q);
     void setPWM(int motorID, float PWM);
+    void setTorque2(int motorID, float torque,float angularVel);
     bool dataGatherer();
     double getPositionRad(int motorID);
     unsigned short CalculateCRC(unsigned short crc_accum, unsigned char *data_blk_ptr, unsigned short data_blk_size);
