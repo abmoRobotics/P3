@@ -9,6 +9,8 @@ class robotArm
 private:
     
     Dynamixel2Arduino *dxl;
+    int Data[5000][2] = { { 0 } };
+    uint32_t Counter = 0;
     
    
 public:
@@ -26,8 +28,9 @@ public:
     void setPosition(int motorID, int16_t goalPos);  // Måske ikke lav
     double getVelocity(int motorID);
     void setVelocity(int motorID, byte goalVel_ptr[]);
-    double calculatePWM(int motorid, float torque);
+    double calculatePWM(int motorid, float torque, float angularVel, float Q);
     void setPWM(int motorID, float PWM);
+    void setTorque2(int motorID, float torque,float angularVel);
     bool dataGatherer();
     double getPositionRad(int motorID);
     unsigned short CalculateCRC(unsigned short crc_accum, unsigned char *data_blk_ptr, unsigned short data_blk_size);
@@ -35,6 +38,9 @@ public:
     double calculateCoriolis(int motorID, double Q1, double Q2, double Q3, double Q4, double DQ1, double DQ2, double DQ3, double DQ4);
     double calculateGravity(int motorID, double Q1, double Q2, double Q3, double Q4);
     double ControlSystem(double ref_DQ1, double ref_DQ2, double ref_DQ3, double ref_DQ4);
+    void MotorConstants(int motorID);
+    void SaveData(int Actual, int Ref);
+    void PrintData();
 };
 enum commandList {
      setTorque = 0x10,
