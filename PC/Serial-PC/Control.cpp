@@ -13,12 +13,13 @@ double getTorque()
 }
 
 
-void arduinoCOM::setTorque(int16_t goalTorque, byte motorID)
+void arduinoCOM::setTorque(int16_t goalTorque, byte motorID, byte direction)
 {
 	byte goalTorqueByte1 = goalTorque;
 	byte goalTorqueByte2 = (goalTorque >> 8);
-	byte GoalTorqueAR[2] = { goalTorqueByte1, goalTorqueByte2 };
-	arduinoCOM::serialData(motorID, 0x10, GoalTorqueAR);
+
+	std::vector<byte> GoalTorqueAR = { goalTorqueByte2, goalTorqueByte1, direction };
+	arduinoCOM::serialData(motorID, 0x16, GoalTorqueAR);
 
 }; // Måske ikke lav
 
@@ -58,7 +59,7 @@ void arduinoCOM::setPosition(int16_t goalPos, byte motorID)
 	byte goalposByte2 = (goalPos >> 8);
 	byte goalPosAR[2] = {goalposByte1, goalposByte2};
 
-	arduinoCOM::serialData(motorID, 0x13, goalPosAR);
+	//arduinoCOM::serialData(motorID, 0x13, goalPosAR);
 	
 }; // Måske ikke lav
 double arduinoCOM::getVelocity(int motorID, char Data[256])
@@ -86,7 +87,7 @@ void arduinoCOM::setVelocity(int16_t goalVel, byte motorID)
 	byte goalVelByte1 = goalVel;
 	byte goalVelByte2 = (goalVel >> 8);
 	byte goalVelAR[2]{ goalVelByte1, goalVelByte2 };
-	arduinoCOM::serialData(motorID, 0x15, goalVelAR);
+	//arduinoCOM::serialData(motorID, 0x15, goalVelAR);
 };
 double getAcceleration() 
 {
@@ -97,10 +98,11 @@ double setAcceleration()
 	return 0;
 };
 
-void arduinoCOM::serialData(byte motorID, byte Instruction, byte param[])
+void arduinoCOM::serialData(byte motorID, byte Instruction, std::vector<byte> param)
 {
 	
-	byte messagelenght = sizeof(param)/4 + 4;
+	byte messagelenght = param.size() + 4;
+	std::vector<byte> paramVec;
 
 	std::vector<byte> header{ 0xff, 0xff, 0xfd, messagelenght, 0x00 };
 	std::vector<byte> datanoCRC;
@@ -108,11 +110,14 @@ void arduinoCOM::serialData(byte motorID, byte Instruction, byte param[])
 	datanoCRC.push_back(motorID);
 	datanoCRC.push_back(Instruction);
 
-	for (size_t i = 0; i < sizeof(param)/4; i++)
+	for (size_t i = 0; i < param.size(); i++)
 	{
 		datanoCRC.push_back(param[i]);
 	}
 	
+
+
+
 	std::vector<unsigned char> CRCVec;
 	CRCVec.insert(CRCVec.end(), header.begin(), header.end());
 	CRCVec.insert(CRCVec.end(), datanoCRC.begin(), datanoCRC.end());
@@ -132,13 +137,23 @@ void arduinoCOM::serialData(byte motorID, byte Instruction, byte param[])
 	char dataToSendArray[30];
 	std::copy(dataToSend.begin(), dataToSend.end(), dataToSendArray);
 	SP->WriteData(dataToSendArray, dataToSend.size());
+	byte acknowledgeByte{};
+	char incomingData[256] = "";			// don't forget to pre-allocate memory
+	int dataLength = 255;
+	clock_t startTime;
+	startTime = clock();
+	while (incomingData[0] != 0x06)
+	{
+		acknowledgeByte = SP->ReadData(incomingData, dataLength);
+		if ((clock() - startTime) / CLOCKS_PER_SEC >= 1)
+		{
+			std::cout << "FAILED TO ACKNOWLEDGE DATA\n";
+			break;
+		}
+	}
+	
+	//std::cout << "Data Sent\n";
 
-	char readData[256]{};
-	byte waitforOK[2]{0x4F, 0x4B};
-	int readResult = 0;
-	std::cout << "Data Sent\n";
-
-	clock_t starttime = clock();
 
 
 	

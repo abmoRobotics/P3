@@ -20,7 +20,8 @@ public:
     robotArm(Dynamixel2Arduino &dxl);
     void startMotors();
     double getTorque(int motorID);
-    void setTorque(int motorID, byte goaltorque_ptr[]); // Måske ikke lav
+    void setTorque(byte motorID, byte goaltorque_ptr[]); // Måske ikke lav
+    void setGripperTorque(byte motorID, byte goaltorque[]);
     int16_t getPosition(int motorID);             // Position in radians
     void setPosition(int motorID, int16_t goalPos);  // Måske ikke lav
     double getVelocity(int motorID);
@@ -41,5 +42,6 @@ enum commandList {
      getPosition,
      setPosition,
      getVelocity,
-     setVelocity
+     setVelocity,
+     setGripperTorque
      };

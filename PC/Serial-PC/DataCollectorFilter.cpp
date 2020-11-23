@@ -7,11 +7,6 @@ void DataCollector::onPose(myo::Myo* myo, uint64_t timestamp, myo::Pose pose) {
 
 }
 
-void DataCollector::releaseGripper() {
-
-	std::cout << "Hej bocaj" << std::endl;
-}
-
 //Funktionen kører hele tiden og tjekker om man dobbeltapper (Funktionen bliver kaldt i main og startes i et nyt multithread)
 void DataCollector::fistModeTimer() {
 	while (true) {
@@ -29,6 +24,11 @@ void DataCollector::fistModeTimer() {
 			Sleep(1000);
 			allowFist = true;
 		}
+		/*if (releaseGpripper)
+		{
+			Sleep(5000);
+			releaseGripper = false;
+		}*/
 	}
 }
 // Får rawEmg data og sætter det ind i et array: emgSamples
@@ -109,10 +109,20 @@ void DataCollector::getPose() {
 		}
 	}
 
-	if (movements[5] == true && procent > 0) {
+	if (movements[5]) {
+		releaseCounter++;
+	}
+	else
+	{
+		releaseCounter = 0;
+	}
+
+	if (movements[5] == true && releaseCounter >= 200 &&procent >= 0 && fistControlOn == false && allowFist == true) {
 		procent = 0;
 		myoData[4] = (int)procent;
-		releaseGripper();
+		//std::cout << "RELEASE MEEEE RELEASE MY BODY\n";
+		releaseGripper = true;
+		
 	}
 
 	//Fist
@@ -162,7 +172,7 @@ void DataCollector::getPose() {
 	}
 	//Prints
 	if (showPoses) {
-		for (int i = 0; i < 4; i++) {
+		for (int i = 0; i < 6; i++) {
 			std::cout << " [" << movements[i] << "]";
 		}
 		std::cout << " [" << myoData[4] << "%]" << std::endl;
@@ -261,27 +271,30 @@ void DataCollector::arduinoThread() {
 		if (finishedSetup) {
 			//sendOrientationToArduino();	
 			//sendPoseToArduino();
-			if (fistControlOn)
+			if (fistControlOn || releaseGripper)
 			{
-				if (myoData[4] > 0)
-				{
 					sendGripperToArduino();
-				}
 			}
-			Sleep(10);
+	
 		}
 		
 	}
 }
 void DataCollector::sendGripperToArduino()
 {
-	byte Instruction = 0x10;
-	byte params[2]{};
 	int torque = myoData[4];
-	params[1] = torque & 0xff;
-	params[0] = (torque >> 8);
-	Arduino.serialData(0x05, Instruction, params);
-	Arduino.serialData(0x06, Instruction, params);
+	if (fistControlOn)
+	{
+		//std::cout << torque << std::endl;
+		Arduino.setTorque(torque, 0x05, 0x00);
+		Arduino.setTorque(torque, 0x06, 0x00);
+	}
+	else if (releaseGripper)
+	{
+		Arduino.setTorque(torque, 0x05, 0x01);
+		releaseGripper = false;
+	}
+	
 }
 
 //Sender pose til arduino (up, down, out, in)

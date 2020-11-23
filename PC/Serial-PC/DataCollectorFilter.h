@@ -27,7 +27,10 @@ private:
 	//Er true når emgData array er fyldt
 	bool avgReady = false;
 	bool fistControlOn = false;
+	bool releaseGripper = false;
 	bool finishedSetup = false;
+
+	int releaseCounter = 0;
 
 	float procent = 0; //Procent af fist
 
@@ -77,7 +80,6 @@ private:
 	void sendGripperToArduino();
 	void arduinoThread();
 	void getFist();
-	void releaseGripper();
 public:
 	void startThreads();
 };

@@ -77,6 +77,10 @@ void loop()
     {
       robot->setTorque(motorID, robot->Parameters);//Ændre tallet når vi lige finder ud af det
     }
+    else if (command == commandList::setGripperTorque)
+    {
+      robot->setGripperTorque(motorID, robot->Parameters);//Ændre tallet når vi lige finder ud af det
+    }
     
   }
  

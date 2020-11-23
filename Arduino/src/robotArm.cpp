@@ -11,35 +11,46 @@ robotArm::robotArm(Dynamixel2Arduino &dxl2)
     startMotors();
 }
 
+void robotArm::setGripperTorque(byte motorID, byte goalTorque[])
+{
+    digitalWrite(LED_BUILTIN, HIGH);
+    if(goalTorque[2] == 0x00)
+    {
+        float goalPWM = 8.5*((goalTorque[0] << 8) | goalTorque[1]);
+        dxl->setGoalPWM(motorID, goalPWM);
+    }
+    else if(goalTorque[2] == 0x01)
+    {
+        dxl->torqueOff(5);
+        dxl->torqueOff(6);
+        dxl->setOperatingMode(5, OP_POSITION);
+        dxl->setOperatingMode(6, OP_POSITION);
+        dxl->torqueOn(5);
+        dxl->torqueOn(6);
+        dxl->setGoalPosition(5, 1900);
+        dxl->setGoalPosition(6, 2850);
+        delay(1000);
+        dxl->torqueOff(5);
+        dxl->torqueOff(6);
+        dxl->setOperatingMode(5, OP_PWM);
+        dxl->setOperatingMode(6, OP_PWM);
+        dxl->torqueOn(5);
+        dxl->torqueOn(6);
+        dxl->setGoalPWM(5, 0);
+        dxl->setGoalPWM(6, 0);
+
+    }
+    
+}
+
 double robotArm::getTorque(int motorID)
 {
     double measuredTorque = dxl->getPresentCurrent(motorID);
     return measuredTorque; 
 }
 
-void robotArm::setTorque(int motorID, byte goalTorque_ptr[])
+void robotArm::setTorque(byte motorID, byte goalTorque_ptr[])
 {
-    digitalWrite(LED_BUILTIN, HIGH);
-    if(goalTorque_ptr[2] == 0x00)
-    {
-        float goalPWM = 8.5*((goalTorque_ptr[0] << 8) | goalTorque_ptr[1]);
-        dxl->setGoalPWM(motorID, goalPWM);
-    }
-    else if(goalTorque_ptr[2] == 0x01)
-    {
-        if(motorID == 5 || motorID == 6)
-        {
-            while(dxl->getPresentPosition(5) > 1900 || dxl->getPresentPosition(6) > 2850)
-            {
-            float goalPWM = (8.5*((goalTorque_ptr[0] << 8) | goalTorque_ptr[1])) * -1;
-            dxl->setGoalPWM(5, -50);
-            dxl->setGoalPWM(6, -50);
-            }
-            dxl->setGoalPWM(5, 0);
-            dxl->setGoalPWM(6, 0);
-
-        }
-    }
     
 }
 void robotArm::setPWM(int motorID, float PWM)
@@ -385,6 +396,7 @@ bool robotArm::dataGatherer()
             }
             robotArm::MotorID = (int)ID;
             robotArm::Instruction = (char)Instruction;
+            Serial.write(0x06);
             return true;
         }
         else
