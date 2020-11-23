@@ -35,6 +35,7 @@ public:
     double calculateCoriolis(int motorID, double Q1, double Q2, double Q3, double Q4, double DQ1, double DQ2, double DQ3, double DQ4);
     double calculateGravity(int motorID, double Q1, double Q2, double Q3, double Q4);
     double ControlSystem(double ref_DQ1, double ref_DQ2, double ref_DQ3, double ref_DQ4);
+    void MotorConstants(int motorID);
 };
 enum commandList {
      setTorque = 0x10,

@@ -120,7 +120,7 @@ double robotArm::calculatePWM(int motorid, float torque, float angularVel, float
     int state = 0;
     if (Q < PI/2){
         state = 2;
-    }
+    }   
     else if (Q > PI/2){
         state = 0;
     }
