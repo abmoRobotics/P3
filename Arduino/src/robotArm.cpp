@@ -420,6 +420,127 @@ bool robotArm::dataGatherer()
     return false;
 }
 
+void robotArm::MotorConstants(int motorID)
+{
+    int32_t floor_pos = 0;
+    int32_t rest_pos = 0;
+    int32_t top_pos = 0;
+    int32_t Pre_pos = getPosition(motorID);
+    double Results[300][2] = {0};
+    int measurements = 40;
+    double speed[measurements][1] = {0};
+    int k = 0;
+    //Set floor position and rest position
+    Pre_pos = getPosition(motorID);
+    //Set floor position
+    floor_pos = Pre_pos - 800;
+    Serial.print("Floor pos: ");
+    Serial.println((int)floor_pos);
+    //Set rest position
+    rest_pos = Pre_pos;
+    Serial.print("Rest pos: ");
+    Serial.println((int)rest_pos);
+    //Set top position two rounds above
+    top_pos = rest_pos + 800;
+    Serial.print("Top pos: ");
+    Serial.println((int)top_pos);
+    setPWM(motorID, 0);
+
+    /*
+    //Test at which PWM the motor begins to move.
+    while (Pre_pos > (getPosition(motorID) - (int)600)){
+        delay(30);
+        setPWM(motorID, PWM);
+        PWM += 1;
+    }
+    */
+
+
+    //For Different PWM
+    for (int i = -300; i < 300; i = i+3)
+    {
+
+        Serial.print("Test nr: ");
+        Serial.print(k);
+        Serial.print("  PWM: ");
+        Serial.print(i);
+        Results[k][0] = i;  //Save PWM in array
+        setPWM(motorID, i); //Set motor PWM
+
+
+        //Wait till motor have moved some
+        delay(100);
+
+        int counter = 0;
+        //Store speed in array;
+        while (counter < 40)
+        {
+            speed[counter][0] = getVelocity(motorID);
+            counter++;
+        }
+
+        //Move motor to rest
+        if (getPosition(motorID)>rest_pos)
+        {
+            setPWM(motorID, -300);
+        } else
+        {
+            setPWM(motorID, 300);
+        }
+
+        double avg_speed = 0;        
+
+        //Calculate avg speed, and store in results array
+        for (int i = 0; i < measurements; i++)
+        {
+            avg_speed = speed[i][0] + avg_speed;
+        }
+        Results[k][1] = avg_speed/measurements;
+        Serial.print("  Avg speed: ");
+        Serial.println(avg_speed/measurements);
+
+        //Wait till motor have reached rest
+        while (!(getPosition(motorID) < rest_pos+150 && getPosition(motorID) > rest_pos-150))
+        {
+            delay(50);
+        }
+        k++;
+    }
+
+    setPWM(motorID, 0);
+
+    Serial.println("Results: ");
+    for (int i = 0; i < 300; i++)
+    {   
+
+        Serial.print(Results[i][0]);
+        Serial.print(";");
+        Serial.println(Results[i][1]);
+    }
+
+}
+
+void robotArm::SaveData(int Actual, int Ref)
+{
+    Data[0][Counter] = Actual;
+    Data[1][Counter] = Ref;
+    if (Counter < 4999)
+    {
+        Counter++;
+    }
+    
+}
+
+void robotArm::PrintData()
+{
+    for (int i = 0; i < 5000; i++)
+    {
+        Serial.print(Data[i][0]);
+        Serial.print(" ");
+        Serial.println(Data[i][1]);
+    }
+    
+}
 
 unsigned short robotArm::CalculateCRC(unsigned short crc_accum, unsigned char *data_blk_ptr, unsigned short data_blk_size)
 {

@@ -9,6 +9,8 @@ class robotArm
 private:
     
     Dynamixel2Arduino *dxl;
+    int Data[5000][2] = { { 0 } };
+    uint32_t Counter = 0;
     
    
 public:
@@ -36,6 +38,8 @@ public:
     double calculateGravity(int motorID, double Q1, double Q2, double Q3, double Q4);
     double ControlSystem(double ref_DQ1, double ref_DQ2, double ref_DQ3, double ref_DQ4);
     void MotorConstants(int motorID);
+    void SaveData(int Actual, int Ref);
+    void PrintData();
 };
 enum commandList {
      setTorque = 0x10,
