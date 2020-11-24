@@ -5,8 +5,8 @@
 
 //LiquidCrystal_I2C lcd(0x27, 16, 2);
 
- Dynamixel2Arduino dxl(DXL_SERIAL, 2);
- robotArm* robot;
+Dynamixel2Arduino dxl(DXL_SERIAL, 2);
+robotArm *robot;
 int indexe = 0;
 void setup()
 {
@@ -14,53 +14,62 @@ void setup()
   Serial3.begin(115200);
   pinMode(LED_BUILTIN, OUTPUT);
   robot = new robotArm(dxl);
-  robot->setTorque(2, 0);
+  //robot->setTorque(2, 0);
+ // robot->setTorque(1, 0);
   robot->setTorque(3, 0);
- 
+
   robot->setTorque(4, 0);
   //lcd.init();
   //lcd.backlight();
 }
 
-
-
- float firstTime;
+float secondTime;
+float firstTime;
 void loop()
 {
   if (indexe == 0)
   {
-    firstTime = micros();
+    firstTime = millis();
   }
-  
- 
+
   //int16_t Value = Data[2] + (Data[3] << 8);
- //robot->setTorque2(1, 1.7, 0.2);
+  //robot->setTorque2(1, 1.7, 0.2);
   //robot->setTorque(2, -0.0087);
   //robot->setTorque(3, -0.0980);
-  //robot->setTorque(4, 0); 
-   
-  robot->setPosition(2, 2015);
+  //robot->setTorque(4, 0);
+  float positionee;
+  float preTime = millis();
+
+ // robot->setPosition(1, 1290);
   robot->setPosition(3, 1090);
   robot->setPosition(4, 2045);
-  robot->ControlSystem(-0.3, 0, 0, 0);
+  //robot->setTorque2(1,-1.7,-0.3,robot->getPositionRad(1));
+  float a = robot->ControlSystem(0, 0, 0, 0);
+  Serial.println(a);
 
-  if (indexe > 1000)
-  {
-    float secondTime = 0;
-    if (indexe == 1000)
-    {
-      secondTime = micros();
-    }
-    float totalTime = secondTime-firstTime;
-    float sampleTime = totalTime / 1000;
-    Serial.print("Sample Time: ");
-    Serial.println(sampleTime);
+  float postTime = millis();
 
-  }
+  float calTime = (postTime - preTime) / 100;
+  //Serial.print("Calculated Time: ");
+  //Serial.println(calTime);
+  //Serial.println(positionee);
 
-   indexe = indexe +1;
+  // if (indexe >= 1000)
+  // {
+  //   if (indexe == 1000)
+  //   {
+  //     secondTime = millis();
+  //   }
+  //   Serial.println(secondTime);
+  //   float totalTime = secondTime - firstTime;
+  //   float sampleTime = totalTime / 1000;
+  //   Serial.print("Sample Time: ");
+  //   Serial.println(sampleTime);
+  // }
 
-/*
+  indexe = indexe + 1;
+
+  /*
   if (robot->dataGatherer()){
   char command = robot->Instruction;
   int motorID = robot->MotorID;

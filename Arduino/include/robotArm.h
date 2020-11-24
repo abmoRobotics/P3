@@ -28,7 +28,7 @@ public:
     void setPosition(int motorID, int16_t goalPos);  // Måske ikke lav
     double getVelocity(int motorID);
     void setVelocity(int motorID, byte goalVel_ptr[]);
-    double calculatePWM(int motorid, float torque, float angularVel, float Q);
+    double calculatePWM(int motorid, float torque, float angularVel);
     void setPWM(int motorID, float PWM);
     void setTorque2(int motorID, float torque,float angularVel);
     bool dataGatherer();
@@ -37,7 +37,7 @@ public:
     double calculateMass(int motorID, double Q1, double Q2, double Q3, double Q4);
     double calculateCoriolis(int motorID, double Q1, double Q2, double Q3, double Q4, double DQ1, double DQ2, double DQ3, double DQ4);
     double calculateGravity(int motorID, double Q1, double Q2, double Q3, double Q4);
-    double ControlSystem(double ref_DQ1, double ref_DQ2, double ref_DQ3, double ref_DQ4);
+    double ControlSystem(double ref_Q1, double ref_Q2, double ref_DQ3, double ref_DQ4);
     void MotorConstants(int motorID);
     void SaveData(int Actual, int Ref);
     void PrintData();
