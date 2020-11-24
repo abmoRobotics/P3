@@ -9,8 +9,8 @@ class robotArm
 private:
     
     Dynamixel2Arduino *dxl;
-    int Data[5000][2] = { { 0 } };
-    uint32_t Counter = 0;
+    //int MyData[5000][2] = { { 0 } };
+    //uint32_t Counter = 0;
     
    
 public:

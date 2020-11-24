@@ -14,39 +14,53 @@ void setup()
   Serial3.begin(115200);
   pinMode(LED_BUILTIN, OUTPUT);
   robot = new robotArm(dxl);
+  robot->setTorque(2, 0);
+  robot->setTorque(3, 0);
+ 
+  robot->setTorque(4, 0);
   //lcd.init();
   //lcd.backlight();
 }
 
 
 
-
+ float firstTime;
 void loop()
 {
-
+  if (indexe == 0)
+  {
+    firstTime = micros();
+  }
+  
+ 
   //int16_t Value = Data[2] + (Data[3] << 8);
-  robot->setTorque2(1, -1.7, -0.2);
+ //robot->setTorque2(1, 1.7, 0.2);
   //robot->setTorque(2, -0.0087);
   //robot->setTorque(3, -0.0980);
   //robot->setTorque(4, 0); 
    
-    
-  //robot->ControlSystem(-0.3, 0, 0, 0);
+  robot->setPosition(2, 2015);
+  robot->setPosition(3, 1090);
+  robot->setPosition(4, 2045);
+  robot->ControlSystem(-0.3, 0, 0, 0);
 
- 
+  if (indexe > 1000)
+  {
+    float secondTime = 0;
+    if (indexe == 1000)
+    {
+      secondTime = micros();
+    }
+    float totalTime = secondTime-firstTime;
+    float sampleTime = totalTime / 1000;
+    Serial.print("Sample Time: ");
+    Serial.println(sampleTime);
 
-  //double a =  robot->ControlSystem(0, 0, 0, 0); 
- //double a = robot->getPositionRad(3);
- //double b = robot->getPositionRad(2);
- //double c = robot->getPositionRad(4);
-  //Serial.print("Motor 2 ");
-  //Serial.println(b);
-  //Serial.print("Motor 3 ");
-  //Serial.println(a);
-  //Serial.print("Motor 4 ");
- // Serial.println(c);
+  }
 
+   indexe = indexe +1;
 
+/*
   if (robot->dataGatherer()){
   char command = robot->Instruction;
   int motorID = robot->MotorID;
@@ -131,5 +145,5 @@ void loop()
   //   }
   //   useData = false;
   // }
-
+*/
 }

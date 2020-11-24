@@ -51,7 +51,10 @@ double robotArm::getTorque(int motorID)
 
 void robotArm::setTorque(byte motorID, byte goalTorque_ptr[])
 {
-    
+   dxl->torqueOff(motorID);
+    dxl->setOperatingMode(motorID, OP_POSITION);
+
+    dxl->torqueOn(motorID);     
 }
 
 void robotArm::setTorque2(int motorID, float torque, float angularVel){
@@ -109,6 +112,7 @@ double robotArm::getPositionRad(int motorID){
 
 void robotArm::setPosition(int motorID, int16_t goalPos)
 {
+
     dxl->setGoalPosition(motorID, goalPos);
 }
 
@@ -129,13 +133,21 @@ double robotArm::calculatePWM(int motorid, float torque, float angularVel, float
     float C1MX106[3] = {127.5108, 83.9591, 40.4073};
 
     int state = 0;
-    if (Q < PI/2){
-        state = 2;
-    }   
-    else if (Q > PI/2){
-        state = 0;
-    }
+    if (Q < ((3*PI)/2) && Q > (PI/2)){
+        if (angularVel > 0){
+            state = 0;
+        }   
+        else if (angularVel < 0){
+            state = 2;
+    }}
     
+    if (Q > ((3*PI)/2) || Q < (PI/2)){
+        if (angularVel < 0){
+            state = 0;
+        }   
+        else if (angularVel > 0){
+            state = 2;
+    }}
 
 
     if (motorid == 1 || motorid == 2)
@@ -325,7 +337,8 @@ double robotArm::ControlSystem(double ref_DQ1, double ref_DQ2, double ref_DQ3, d
 
         setTorque2(i+1,torque,ref_DQ1); 
     }
-  // Virker ikke i negativ retning efter ca. 20 grader
+ 
+
     return Q1;
 }
 
@@ -534,23 +547,23 @@ void robotArm::MotorConstants(int motorID)
 
 void robotArm::SaveData(int Actual, int Ref)
 {
-    Data[0][Counter] = Actual;
-    Data[1][Counter] = Ref;
+    /*MyData[0][Counter] = Actual;
+    MyData[1][Counter] = Ref;
     if (Counter < 4999)
     {
         Counter++;
-    }
+    }*/
     
 }
 
 void robotArm::PrintData()
 {
-    for (int i = 0; i < 5000; i++)
+    /*for (int i = 0; i < 5000; i++)
     {
-        Serial.print(Data[i][0]);
+        Serial.print(MyData[i][0]);
         Serial.print(" ");
-        Serial.println(Data[i][1]);
-    }
+        Serial.println(MyData[i][1]);
+    }*/
     
 }
 
