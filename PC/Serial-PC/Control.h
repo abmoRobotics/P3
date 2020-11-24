@@ -5,7 +5,7 @@
 class arduinoCOM
 {
 public:
-    Serial* SP = new Serial("COM7");    // adjust as needed
+    Serial* SP = new Serial("COM8");    // adjust as needed
     double getTorque() {};
     void setTorque(int16_t goalTorque, byte motorID, byte direction); // Måske ikke lav
     int16_t getPosition(int motorID); // Position in radians

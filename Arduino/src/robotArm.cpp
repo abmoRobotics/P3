@@ -14,7 +14,7 @@ robotArm::robotArm(Dynamixel2Arduino &dxl2)
 void robotArm::setGripperTorque(byte motorID, byte goalTorque[])
 {
     digitalWrite(LED_BUILTIN, HIGH);
-    if(goalTorque[2] == 0x00)
+    if(goalTorque[2] == 0x02)
     {
         float goalPWM = 8.5*((goalTorque[0] << 8) | goalTorque[1]);
         dxl->setGoalPWM(motorID, goalPWM);
@@ -40,7 +40,6 @@ void robotArm::setGripperTorque(byte motorID, byte goalTorque[])
         dxl->setGoalPWM(6, 0);
 
     }
-    
 }
 
 double robotArm::getTorque(int motorID)
