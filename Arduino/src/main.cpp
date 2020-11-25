@@ -16,9 +16,9 @@ void setup()
   robot = new robotArm(dxl);
   //robot->setTorque(2, 0);
  // robot->setTorque(1, 0);
-  robot->setTorque(3, 0);
+  //robot->setTorque(3, 0);
 
-  robot->setTorque(4, 0);
+  //robot->setTorque(4, 0);
   //lcd.init();
   //lcd.backlight();
 }
@@ -32,6 +32,8 @@ void loop()
     firstTime = millis();
   }
 
+ 
+/*
   //int16_t Value = Data[2] + (Data[3] << 8);
   //robot->setTorque2(1, 1.7, 0.2);
   //robot->setTorque(2, -0.0087);
@@ -53,6 +55,13 @@ void loop()
   //Serial.print("Calculated Time: ");
   //Serial.println(calTime);
   //Serial.println(positionee);
+*/
+for (size_t i = 0; i < 1000; i++)
+{
+
+     robot->Write_Data(0, 0, 0, 0);
+}
+secondTime = millis();
 
   // if (indexe >= 1000)
   // {
@@ -61,10 +70,10 @@ void loop()
   //     secondTime = millis();
   //   }
   //   Serial.println(secondTime);
-  //   float totalTime = secondTime - firstTime;
-  //   float sampleTime = totalTime / 1000;
-  //   Serial.print("Sample Time: ");
-  //   Serial.println(sampleTime);
+   float totalTime = secondTime - firstTime;
+     float sampleTime = totalTime / 1000;
+     Serial.print("Sample Time: ");
+     Serial.println(sampleTime);
   // }
 
   indexe = indexe + 1;

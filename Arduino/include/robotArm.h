@@ -11,7 +11,14 @@ private:
     Dynamixel2Arduino *dxl;
     //int MyData[5000][2] = { { 0 } };
     //uint32_t Counter = 0;
-    
+    typedef struct sr_data{
+        int32_t present_velocity;
+        uint32_t present_position;
+    }  __attribute__((packed)) sr_data_t;
+
+    typedef struct sw_data{
+        int32_t goal_PWM;
+    } __attribute__((packed)) sw_data_t;
    
 public:
     char Instruction{};
@@ -41,6 +48,8 @@ public:
     void MotorConstants(int motorID);
     void SaveData(int Actual, int Ref);
     void PrintData();
+    double Read_Data(sr_data_t *ReadData, int size);
+    double Write_Data(double tau1, double tau2, double tau3, double tau4);
 };
 enum commandList {
      setTorque = 0x10,
