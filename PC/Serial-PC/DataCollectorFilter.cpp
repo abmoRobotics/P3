@@ -1,6 +1,13 @@
 #include "DataCollectorFilter.h"
 #include <math.h>
+#include <atlstr.h>
+#include <string.h>
 
+
+DataCollector::DataCollector()
+{
+
+}
 //Funktionen kaldes når vi modtager et nyt pose fra myo
 void DataCollector::onPose(myo::Myo* myo, uint64_t timestamp, myo::Pose pose) {
 
@@ -11,24 +18,20 @@ void DataCollector::onPose(myo::Myo* myo, uint64_t timestamp, myo::Pose pose) {
 void DataCollector::fistModeTimer() {
 	while (true) {
 		Sleep(10);
-		if (fistControlOn) { //Når man har dobbeltappet
-			allowFist = false; 
+		if (fistControlOn) { //Når man har lavet bevægelsen for at lukke gripper
+			allowFist = false; //Opdater så gripperen ikke kan åbnes imens den lukkes
 			PlaySound(TEXT("swoosh.wav"), NULL, SND_SYNC);
 			//Sleep(1000);
-			allowRead = true;
+			allowRead = true; //Tillader at procenten opdateres
 			Sleep(5000);
 			fistControlOn = false;
 			std::cout << "LOCKED" << std::endl;
 			PlaySound(TEXT("targetLocked.wav"), NULL, SND_SYNC);
-			allowRead = false;
+			allowRead = false; //Gør at procenten ikke længere opdateres
 			Sleep(1000);
-			allowFist = true;
+			allowFist = true; //Opdater, så man igen kan åbne gripperen. (Gøres for at sikre gripperen ikke åbnes ved fejl)
 		}
-		/*if (releaseGpripper)
-		{
-			Sleep(5000);
-			releaseGripper = false;
-		}*/
+		
 	}
 }
 // Får rawEmg data og sætter det ind i et array: emgSamples
@@ -93,14 +96,14 @@ void DataCollector::getPose() {
 	//Kører i gennem alle poses, tjekker om de er aktive, og deaktiverer resten
 	for (int i = 0; i < 6; i++) {
 		if (movements[i]) {
-			for (int j = 0; j < 5; j++) { //Reset alle movements til 0
+			for (int j = 0; j < 5; j++) { //Reset alle movements til 0 //Hvorfor 5 når der er 6 poses?
 				movements[j] = false;
 			}
 			movements[i] = true; //Sæt den aktive pose til true igen
 		}
 	}
 
-	if (movements[4] == true && fistControlOn == false && allowFist) {
+	if (movements[4] == true && !fistControlOn && allowFist) {
 
 		//Begynd fistmode hvis procent er 0
 		if (procent == 0) {
@@ -117,7 +120,7 @@ void DataCollector::getPose() {
 		releaseCounter = 0;
 	}
 
-	if (movements[5] == true && releaseCounter >= 200 &&procent >= 0 && fistControlOn == false && allowFist == true) {
+	if (movements[5] == true && releaseCounter >= 200 && !fistControlOn && allowFist) {
 		procent = 0;
 		myoData[4] = (int)procent;
 		//std::cout << "RELEASE MEEEE RELEASE MY BODY\n";
@@ -183,7 +186,7 @@ void DataCollector::getPose() {
 //Funktionen kaldes når vi modtager nyt emgData (hver 5 millisekund eller noget fast)
 void DataCollector::onEmgData(myo::Myo* myo, uint64_t timestamp, const int8_t* emg)
 {
-	myo->unlock(myo::Myo::unlockHold); //myo bandet unlockes hver 5 millisekund for at sikre at dobbeltap virker på første forsøg)
+	myo->unlock(myo::Myo::unlockHold); //myo bandet unlockes hver 5 millisekund for at sikre at dobbeltap virker på første forsøg) //Er dette stadig relevant?
 
 	//Modtag rå emgData og indsæt i en matrice, samt flyt tidligere data i en anden matrice
 	getData(emg);
@@ -286,18 +289,18 @@ void DataCollector::sendGripperToArduino()
 	if (fistControlOn)
 	{
 		//std::cout << torque << std::endl;
-		Arduino.setTorque(torque, 0x05, 0x00);
-		Arduino.setTorque(torque, 0x06, 0x00);
+		Arduino.setTorque(torque, 0x05, 0x01);
+		Arduino.setTorque(torque, 0x06, 0x01);
 	}
 	else if (releaseGripper)
 	{
-		Arduino.setTorque(torque, 0x05, 0x01);
+		Arduino.setTorque(torque, 0x05, 0x02);
 		releaseGripper = false;
 	}
 	
 }
 
-//Sender pose til arduino (up, down, out, in)
+//Sender pose til arduino (up, down, out, in) //SKAL LAVES OM
 void DataCollector::sendPoseToArduino()
 {
 	if (myoData[0] == 1)
@@ -319,7 +322,7 @@ void DataCollector::sendPoseToArduino()
 }
 
 
-//Sender orientationen til arduino
+//Sender orientationen til arduino //SKAL LAVES OM
 void DataCollector::sendOrientationToArduino()
 {
 
@@ -357,13 +360,16 @@ void DataCollector::startThreads() {
 //Kalibrerings funktion
 void DataCollector::setupMyo(){
 	//Loop indtil arduino er connected
+	
+	std::cout << *Arduino.comPort << std::endl;
 	if (!Arduino.isConnected())
 	{
 		std::cout << "Arduino is not connected" << std::endl;
 		Sleep(500);
 	}
+	else if(Arduino.isConnected()) std::cout << "Arduino is connected!" << std::endl;
 
-	std::cout << "Arduino is connected!" << std::endl;
+	
 
 	//Her kan brugeren bestemme hvilken data de vil vise i terminalen
 	char input;
@@ -453,5 +459,7 @@ void DataCollector::setupMyo(){
 	T = temp;
 	//Færdiggør setup
 	finishedSetup = true;
-
+	std::terminate();
 }
+
+

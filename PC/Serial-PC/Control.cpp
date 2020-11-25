@@ -4,7 +4,12 @@
 #include <sstream>
 #include <vector>
 #include <time.h>
+#include <atlstr.h>
 
+
+arduinoCOM::arduinoCOM()
+{	
+}
 //Ikke lavet (den laver emil og anton i arduino)
 double getTorque()
 {
@@ -204,4 +209,45 @@ unsigned short arduinoCOM::CalculateCRC(unsigned short crc_accum, unsigned char*
 	}
 
 	return crc_accum;
+}
+
+
+void arduinoCOM::SelectComPort() //added fucntion to find the present serial ports of the system;
+{
+
+	TCHAR lpTargetPath[5000]; // buffer to store the path of the COMPORTS
+	DWORD test;
+	bool gotPort = 0; // in case the port is not found
+	std::string teststr;
+
+	for (int i = 0; i < 255; i++) // checking ports from COM0 to COM255
+	{
+		CString str;
+		str.Format(_T("%d"), i);
+		CString ComName = CString("COM") + CString(str); // converting to COM0, COM1, COM2
+
+		test = QueryDosDevice(ComName, (LPWSTR)lpTargetPath, 5000);
+
+		// Test the return value and error if any
+		if (test != 0) //QueryDosDevice returns zero if it didn't find an object
+		{
+
+			CT2CA pszConvertedAnsiString(ComName);
+			std::string strStd(pszConvertedAnsiString);
+			this->comPort = &strStd[0];
+			//std::wcout << ComName.GetString() << std::endl;
+
+			//m_MyPort.AddString((CString)ComName); // add to the ComboBox
+			gotPort = 1; // found port
+		}
+
+		if (::GetLastError() == ERROR_INSUFFICIENT_BUFFER) //in case buffer got filled
+		{
+			lpTargetPath[10000]; // in case the buffer got filled, increase size of the buffer.
+			continue;
+		}
+
+
+	}
+
 }

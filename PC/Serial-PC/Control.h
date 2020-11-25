@@ -5,7 +5,8 @@
 class arduinoCOM
 {
 public:
-    Serial* SP = new Serial("COM8");    // adjust as needed
+    const char* comPort = "COM3";
+    Serial* SP = new Serial(comPort);    // adjust as needed
     double getTorque() {};
     void setTorque(int16_t goalTorque, byte motorID, byte direction); // Måske ikke lav
     int16_t getPosition(int motorID); // Position in radians
@@ -17,8 +18,11 @@ public:
     bool isConnected() { return SP->IsConnected(); };
     unsigned short CalculateCRC(unsigned short crc_accum, unsigned char* data_blk_ptr, unsigned short data_blk_size);
     void serialData(byte motorID, byte Instruction, std::vector<byte>);
+    void SelectComPort();
 
     char Data[256] {};// {kommando, motorid, værdi}
+
+    arduinoCOM();
 };
 
 
