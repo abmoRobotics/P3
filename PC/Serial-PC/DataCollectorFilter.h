@@ -80,6 +80,10 @@ private:
 	void sendGripperToArduino();
 	void arduinoThread();
 	void getFist();
+	
+	
 public:
 	void startThreads();
+	
+	DataCollector();
 };
