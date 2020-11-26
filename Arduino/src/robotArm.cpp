@@ -57,7 +57,7 @@ void robotArm::setTorque(byte motorID, byte goalTorque_ptr[])
 }
 
 void robotArm::setTorque2(int motorID, float torque, float angularVel){
-    float PWM = calculatePWM(motorID, torque, angularVel);
+    float PWM = calculatePWM(motorID, torque, angularVel, 0);
     dxl->setGoalPWM(motorID,PWM);
 }
 
@@ -121,7 +121,7 @@ double robotArm::getVelocity(int motorID)
     return measuredVel;
 }
 
-double robotArm::calculatePWM(int motorid, float torque, float angularVel)
+double robotArm::calculatePWM(int motorid, float torque, float angularVel, float rot_dir)
 {
     int PWM;
     float C2MX28{115.2662};
@@ -130,30 +130,65 @@ double robotArm::calculatePWM(int motorid, float torque, float angularVel)
     float C1MX28[3] = {642.9920, 427.3706, 211.7492}; // [0]: positive [1]: stand still [2]: negative rotation
     float C1MX64[3] = {224.4644, 152.6855, 80.9066};
     float C1MX106[3] = {127.5108, 83.9591, 40.4073};
-    int friction_106 = 21;
     int state = 0;
-
-    if (torque > 0)
-    {
-        if (angularVel > 0){
+    double konstant = 50;
+    // Decide C1
+    if (torque > 0){
+        if (angularVel > 0){          
            state = 0;
         }
+        else if (angularVel == 0){
+            state = 1;
+        } 
         else if (angularVel < 0){
             state = 2;
         }
     }
-    else if (torque < 0){
+    if (torque < 0){
         if (angularVel < 0){
-           state = 0;
+            if (rot_dir < 0){
+                state = 0;
+            }
+            else if (rot_dir > 0){
+                 state = 2;
+            }
         }
+        else if (angularVel == 0){
+            state = 1;
+        }        
         else if (angularVel > 0){
-            state = 2;
+            if (rot_dir < 0)
+            {
+                state = 0;
+            }
+            else if (rot_dir > 0)
+            {
+                state = 2;
+            }
+            
         }
-    }
-
-
+    }  
+    //
     if (motorid == 1 || motorid == 2){
         PWM = torque * C1MX106[state] + angularVel * C2MX106;
+        if (angularVel > -0.05 && angularVel <0.05 ){
+            if (torque > 0){
+                if (rot_dir > 0){
+                   PWM = PWM + konstant - konstant*20*angularVel; 
+                }
+                else if (rot_dir < 0){
+                    PWM = PWM - konstant - (konstant*20*angularVel);
+                }
+            }        
+            else if (torque < 0){
+                 if (rot_dir > 0){
+                   PWM = PWM + konstant - konstant*20*angularVel; 
+                }
+                else if (rot_dir < 0){
+                    PWM = PWM - konstant - (konstant*20*angularVel);
+                }
+            }
+        }
     }
     else if (motorid == 3){
         PWM = torque * C1MX64[state] + angularVel * C2MX64;
@@ -161,6 +196,13 @@ double robotArm::calculatePWM(int motorid, float torque, float angularVel)
     else if (motorid == 4 || motorid == 5 || motorid == 6){
         PWM = torque * C1MX28[state] + angularVel * C2MX28;
     }
+    if (PWM > 885){
+        PWM = 885;
+    }
+    else if (PWM < - 885){
+        PWM = -885;
+    }
+    
     return PWM;
 }
 
@@ -232,7 +274,7 @@ return M;
 }
 
 double robotArm::calculateCoriolis(int motorID, double Q1, double Q2, double Q3, double Q4, double DQ1, double DQ2, double DQ3, double DQ4){
-        double t2 = cos(Q1);
+    double t2 = cos(Q1);
     double t3 = cos(Q2);
     double t4 = cos(Q3);
     double t5 = cos(Q4);
@@ -285,7 +327,6 @@ double robotArm::calculateCoriolis(int motorID, double Q1, double Q2, double Q3,
 return V;
 }
     
-
 double robotArm::calculateGravity(int motorID, double Q1, double Q2, double Q3, double Q4){
     double t2 = cos(Q1);
     double t3 = cos(Q2);
@@ -317,37 +358,87 @@ double robotArm::calculateGravity(int motorID, double Q1, double Q2, double Q3, 
 }
 
 double robotArm::ControlSystem(double ref_Q1, double ref_Q2, double ref_DQ3, double ref_DQ4){
-    double Kp[4] = {500000, 10, 10, 10};
-    double Kv[4] = {10, 10, 10, 10};
-    sr_data_t JointData[4];
+    double Kp[4] = {50, 10, 10, 10};
+    double Kv[4] = {20, 10, 10, 10};
+    double Ki[4] = {0.01, 0, 0, 0};
+    double Kd[4] = {0, 0, 0, 0};
+    double ts;
+    static double ts_old = 0;
+    double Ts;    
+    static double error_old[4] = {0, 0, 0, 0};
+    static double ui_old[4] = {0, 0, 0, 0};
+    double ui[4] = {0, 0, 0, 0};
+    double ud[4] = {0, 0, 0, 0};
+    sr_data_conv_t JointData[4];
     Read_Data(JointData, 4);
+    ts=millis();
+    Ts = ts - ts_old; //samplingstid
+    ts_old = ts;
     double PWM[4];
-    double Q1 = JointData[0].present_position;
-    double Q2 = JointData[1].present_position;
-    double Q3 = JointData[2].present_position;
-    double Q4 = JointData[3].present_position;
-
+    
 
     double DQ[4] = {JointData[0].present_velocity, JointData[1].present_velocity, JointData[2].present_velocity, JointData[3].present_velocity};
+    double Q[4] = {JointData[0].present_position,JointData[1].present_position,JointData[2].present_position,JointData[3].present_position};
+    static double Q_old[4] = {Q[0], Q[1], Q[2], Q[3]};
+    static double DQ_old[4] = {DQ[0], DQ[1], DQ[2], DQ[3]};
 
-    double error[4] = {ref_Q1-Q1, ref_Q2-Q2, ref_DQ3-DQ[3], ref_DQ4-DQ[4]};
-    double torque[4];
-    for (int i = 1; i < 2; i++)
+    for (size_t i = 0; i < 4; i++)
     {
-        torque[i] = (((error[i]*Kp[i])-(DQ[i]*Kv[i]))*calculateMass(i+1, Q1, Q2, Q3, Q4)+ (calculateCoriolis(i+1, Q1, Q2, Q3, Q4, DQ[1], DQ[2], DQ[3], DQ[4]) + calculateGravity(i+1, Q1, Q2, Q3, Q4)));
+       if (abs(DQ_old[i] - DQ[i]) > 3){
+        DQ[i] = DQ_old[i];
+        }
+        if (abs(Q_old[i]-Q[i]) > 0.2)
+        {
+            Q[i] = Q_old[i];
+        }
+    
+    }
+    
+   
+    Q_old[0] = Q[0];
+    DQ_old[0] = DQ[0];
+
+    double error[4] = {ref_Q1-Q[0], ref_Q2-Q[1], ref_DQ3-DQ[2], ref_DQ4-DQ[3]};
+    double torque[4];
+            for (int i = 0; i < 1; i++){
+        ui[i] = ui_old[i] + ((Ki[i]*Ts)/2)*(error[i]+error_old[i]);
+        ud[i] = Kd[i] * ((error[i]-error_old[i])/Ts);
+        torque[i] = (((error[i]*Kp[i]) + ui[i] + ud[i] - (DQ[i]*Kv[i]))*calculateMass(i+1, Q[0], Q[1], Q[2], Q[3])+ (calculateCoriolis(i+1, Q[0], Q[1], Q[2], Q[3], DQ[0], DQ[1], DQ[2], DQ[3]) + calculateGravity(i+1, Q[0], Q[1], Q[2], Q[3])));
+        
+        ui_old[i] = ui[i];
+        error_old[i] = error[i];
     }
 
-    PWM[0] = calculatePWM(1, torque[0], error[0]);
-    PWM[1] = calculatePWM(2, torque[1], error[1]);
-    PWM[2] = calculatePWM(3, torque[2], ref_DQ3);
-    PWM[3] = calculatePWM(4, torque[3], ref_DQ4);
+    PWM[0] = calculatePWM(1, torque[0], DQ[0], error[0]);
+    PWM[1] = calculatePWM(2, torque[1], DQ[1], error[1]);
+    PWM[2] = calculatePWM(3, torque[2], DQ[2], ref_DQ3);
+    PWM[3] = calculatePWM(4, torque[3], DQ[3], ref_DQ4);
+    Serial.print(PWM[0]);
+    // Serial.print(PWM[0]);
+     Serial.print(" ");
+    // Serial.print(torque[0]);
+    // Serial.print(" ");
+     Serial.print(Q[0]);
+     Serial.print(" ");
+     Serial.println(Ts);
+    // Serial.print(" ");
+     // Serial.print(Q[1]);
+    // Serial.print(" ");
+    // Serial.print(DQ[1]);
+    // Serial.print(" ");
+    // Serial.print(Q[2]);
+    // Serial.print(" ");
+    // Serial.print(DQ[2]);
+    //     Serial.print(" ");
+    // Serial.print(Q[3]);
+    // Serial.print(" ");
+    // Serial.println(DQ[3]);
 
-    Write_Data(PWM[0], PWM[1], PWM[2], PWM[3]);
-
+    setPWM(1,PWM[0]);
+    //Write_Data(PWM[0], PWM[1], PWM[2], PWM[3]);
 }
 
-double robotArm::Read_Data(sr_data_t *ReadData, int size){
-    
+double robotArm::Read_Data(sr_data_conv_t *ReadData, int size){
     int zeroPOS[4] = {1290, 2015, 1090, 2045};
     int Resolution = 4095;
 
@@ -371,29 +462,23 @@ double robotArm::Read_Data(sr_data_t *ReadData, int size){
     sr_infos.p_xels = info_xels_sr;
     sr_infos.xel_count = 0;
 
-    for (uint8_t i = 0; i < DXL_ID_CNT; i++)
-    {
+    for (uint8_t i = 0; i < DXL_ID_CNT; i++){
         info_xels_sr[i].id = DXL_ID_LIST[i];
         info_xels_sr[i].p_recv_buf = (uint8_t*)&sr_data[i];
         sr_infos.xel_count++;
     }
     sr_infos.is_info_changed = true;
-
     uint8_t recv_cnt = dxl->syncRead(&sr_infos);
   
-    for (size_t i = 0; i < size; i++)
-    {
-        ReadData[i].present_position = (sr_data[i].present_position-zeroPOS[i]) * (2 * PI / Resolution);
+    for (size_t i = 0; i < size; i++){
+        ReadData[i].present_position = (double)((sr_data[i].present_position)-zeroPOS[i]) * (2 * PI /(double)Resolution);
         ReadData[i].present_velocity = sr_data[i].present_velocity * 0.023980823895;
     }
-    
 }
-
 
 double robotArm::Write_Data(double tau1, double tau2, double tau3, double tau4){
     const uint8_t  DXL_ID_CNT = 4; // Amount of motors
     const uint8_t DXL_ID_LIST[DXL_ID_CNT] = {1, 2, 3, 4}; // Motor counter
-
     const uint16_t sw_Addr = 100; //Address for goal PWM
     const uint16_t sw_length = 2;  //Size in bytes for PWM 
 
@@ -409,24 +494,20 @@ double robotArm::Write_Data(double tau1, double tau2, double tau3, double tau4){
     sw_infos.p_xels = info_xels_sw;
     sw_infos.xel_count = 0;
 
+    sw_data[0].goal_PWM = tau1;
+    sw_data[1].goal_PWM = tau2;
+    sw_data[2].goal_PWM = tau3;
+    sw_data[3].goal_PWM = tau4;
 
-        sw_data[0].goal_PWM = tau1;
-        sw_data[1].goal_PWM = tau2;
-        sw_data[2].goal_PWM = tau3;
-        sw_data[3].goal_PWM = tau4;
-
-        for(uint8_t i = 0; i < DXL_ID_CNT; i++){
+    for(uint8_t i = 0; i < DXL_ID_CNT; i++){
         info_xels_sw[i].id = DXL_ID_LIST[i];
         info_xels_sw[i].p_data = (uint8_t*)&sw_data[i].goal_PWM;
         sw_infos.xel_count++;
     }
+
     sw_infos.is_info_changed = true;
 
-    if (dxl->syncWrite(&sw_infos) == true)
-    {
-        
-    }
-    
+    if (dxl->syncWrite(&sw_infos) == true){}    
 }
 
 bool robotArm::dataGatherer()
@@ -700,6 +781,7 @@ unsigned short robotArm::CalculateCRC(unsigned short crc_accum, unsigned char *d
 }
 
 void robotArm::startMotors()
+
 {
     for (size_t i = 1; i < 7; i++)
     {
@@ -708,4 +790,14 @@ void robotArm::startMotors()
 
         dxl->torqueOn(i);
     }
+}
+
+double robotArm::Tester(){
+    // sr_data_conv_t Tester_sr[4];
+    // Read_Data(Tester_sr, 4);
+    // Serial.println(Tester_sr[3].present_position);
+
+    Serial.print(" ");
+    Serial.println(dxl->getPresentPWM(1));
+
 }

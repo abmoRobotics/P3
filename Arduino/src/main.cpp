@@ -14,10 +14,12 @@ void setup()
   Serial3.begin(115200);
   pinMode(LED_BUILTIN, OUTPUT);
   robot = new robotArm(dxl);
-  //robot->setTorque(2, 0);
- // robot->setTorque(1, 0);
-  //robot->setTorque(3, 0);
-
+//robot->setTorque(2, 0);
+//robot->setTorque(4, 0);
+//robot->setTorque(3, 0);
+//robot->setPosition(2, 2015);
+//robot->setPosition(3, 1090);
+//robot->setPosition(4, 2045);
   //robot->setTorque(4, 0);
   //lcd.init();
   //lcd.backlight();
@@ -31,37 +33,48 @@ void loop()
   {
     firstTime = millis();
   }
+if ((indexe % 1000) > 500)
+{
+ robot->ControlSystem(PI/4, 0, 0, 0);
+}
+else
+{
+ robot->ControlSystem(0, 0, 0, 0);
+}
 
- 
-/*
+
+// robot->Tester();
+
   //int16_t Value = Data[2] + (Data[3] << 8);
   //robot->setTorque2(1, 1.7, 0.2);
   //robot->setTorque(2, -0.0087);
   //robot->setTorque(3, -0.0980);
   //robot->setTorque(4, 0);
-  float positionee;
-  float preTime = millis();
+  // float positionee;
+  // float preTime = millis();
 
- // robot->setPosition(1, 1290);
-  robot->setPosition(3, 1090);
-  robot->setPosition(4, 2045);
+ 
+
   //robot->setTorque2(1,-1.7,-0.3,robot->getPositionRad(1));
-  float a = robot->ControlSystem(0, 0, 0, 0);
-  Serial.println(a);
+ // float a = robot->ControlSystem(0, 0, 0, 0);
+//  Serial.println(a);
 
-  float postTime = millis();
+  // float postTime = millis();
 
-  float calTime = (postTime - preTime) / 100;
+  // float calTime = (postTime - preTime) / 100;
   //Serial.print("Calculated Time: ");
   //Serial.println(calTime);
   //Serial.println(positionee);
-*/
-for (size_t i = 0; i < 1000; i++)
-{
+// for (size_t i = 0; i < 1000; i++)
+// {
+//     //  robot->Write_Data(0, 0, 0, 0);
+//     //  robot->Tester();
+    
+// }
 
-     robot->Write_Data(0, 0, 0, 0);
-}
-secondTime = millis();
+
+
+//robot->Tester();
 
   // if (indexe >= 1000)
   // {
@@ -70,10 +83,10 @@ secondTime = millis();
   //     secondTime = millis();
   //   }
   //   Serial.println(secondTime);
-   float totalTime = secondTime - firstTime;
-     float sampleTime = totalTime / 1000;
-     Serial.print("Sample Time: ");
-     Serial.println(sampleTime);
+  //  float totalTime = secondTime - firstTime;
+  //    float sampleTime = totalTime / 1000;
+  //    Serial.print("Sample Time: ");
+  //    Serial.println(sampleTime);
   // }
 
   indexe = indexe + 1;

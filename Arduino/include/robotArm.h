@@ -13,9 +13,12 @@ private:
     //uint32_t Counter = 0;
     typedef struct sr_data{
         int32_t present_velocity;
-        uint32_t present_position;
+        int32_t present_position;
     }  __attribute__((packed)) sr_data_t;
-
+typedef struct sr_data_conv{
+        double present_velocity;
+        double present_position;
+    }  __attribute__((packed)) sr_data_conv_t;
     typedef struct sw_data{
         int32_t goal_PWM;
     } __attribute__((packed)) sw_data_t;
@@ -35,7 +38,7 @@ public:
     void setPosition(int motorID, int16_t goalPos);  // Måske ikke lav
     double getVelocity(int motorID);
     void setVelocity(int motorID, byte goalVel_ptr[]);
-    double calculatePWM(int motorid, float torque, float angularVel);
+    double calculatePWM(int motorid, float torque, float angularVel, float rot_dir);
     void setPWM(int motorID, float PWM);
     void setTorque2(int motorID, float torque,float angularVel);
     bool dataGatherer();
@@ -48,8 +51,9 @@ public:
     void MotorConstants(int motorID);
     void SaveData(int Actual, int Ref);
     void PrintData();
-    double Read_Data(sr_data_t *ReadData, int size);
+    double Read_Data(sr_data_conv_t *ReadData, int size);
     double Write_Data(double tau1, double tau2, double tau3, double tau4);
+    double Tester();
 };
 enum commandList {
      setTorque = 0x10,
