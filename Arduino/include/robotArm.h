@@ -1,6 +1,6 @@
 #pragma once
 #include "Dynamixel2Arduino.h"
-#define DXL_SERIAL Serial1
+#define DXL_SERIAL Serial2
 
 
 class robotArm

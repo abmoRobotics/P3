@@ -11,7 +11,7 @@ int indexe = 0;
 void setup()
 {
   Serial.begin(115200);
-  Serial3.begin(115200);
+  //Serial3.begin(115200);
   pinMode(LED_BUILTIN, OUTPUT);
   robot = new robotArm(dxl);
 //robot->setTorque(2, 0);
@@ -33,15 +33,39 @@ void loop()
   {
     firstTime = millis();
   }
-if ((indexe % 1000) > 500)
+// if ((indexe % 1000) > 500)
+// {
+//  robot->ControlSystem(PI, 0, 0, 0);
+// }
+// else
+// {
+//  robot->ControlSystem(0, 0, 0, 0);
+// }
+// if ((indexe % 1000) < 500)
+// {
+//   int b = indexe%1000;
+//  // robot->ControlSystem((PI/2)-0.00314*b, 0, 0, 0);
+//   robot->ControlSystem(0, (0)+0.00157*b, 0, 0);
+// }
+// else {
+//  //robot->ControlSystem(0+((indexe%1000)-500)*0.00314, 0, 0, 0);
+
+// robot->ControlSystem(0, (PI/4)-((indexe%1000)-500)* 0.00157, 0, 0);
+// }
+
+if ((indexe % 1000) < 500)
 {
- robot->ControlSystem(PI/4, 0, 0, 0);
+  int b = indexe%1000;
+ // robot->ControlSystem((PI/2)-0.00314*b, 0, 0, 0);
+  robot->ControlSystem(0, 0, 0.2, 0);
 }
-else
-{
- robot->ControlSystem(0, 0, 0, 0);
+else {
+ //robot->ControlSystem(0+((indexe%1000)-500)*0.00314, 0, 0, 0);
+
+robot->ControlSystem(0, 0, -0.2, 0);
 }
 
+//robot->Tester();
 
 // robot->Tester();
 
