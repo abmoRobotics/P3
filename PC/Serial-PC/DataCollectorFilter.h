@@ -75,7 +75,7 @@ private:
 	void getData(const int8_t*);
 	void applyFilter();
 	void getPose();
-	void sendOrientationToArduino();
+	void sendVelocityToArduino();
 	void sendPoseToArduino();
 	void sendGripperToArduino();
 	void arduinoThread();
