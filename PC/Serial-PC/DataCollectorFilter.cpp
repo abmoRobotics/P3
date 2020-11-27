@@ -271,14 +271,27 @@ void DataCollector::onOrientationData(myo::Myo* myo, uint64_t timestap, const my
 //Sender data til arduino hele tiden 
 void DataCollector::arduinoThread() {
 	while(1) {
-		if (finishedSetup) {
-			//sendOrientationToArduino();	
-			//sendPoseToArduino();
+		if (1) {
+			
+			std::chrono::steady_clock sc;   // create an object of `steady_clock` class
+			auto start = sc.now();     // start timer
+
+			Arduino.setJointPosition(1000, 1);
+			
+
+
+			auto end = sc.now();       // end timer (starting & ending is done by measuring the time at the moment the process started & ended respectively)
+			auto time_span = static_cast<std::chrono::duration<double>>(end - start);   // measure time span between start & end
+			std::cout << "Operation took: " << time_span.count() << " seconds !!!\n";
 			if (fistControlOn || releaseGripper)
 			{
 					sendGripperToArduino();
 			}
-	
+			else
+			{
+				sendVelocityToArduino();	
+				sendPoseToArduino();
+			}
 		}
 		
 	}
@@ -289,12 +302,12 @@ void DataCollector::sendGripperToArduino()
 	if (fistControlOn)
 	{
 		//std::cout << torque << std::endl;
-		Arduino.setTorque(torque, 0x05, 0x01);
-		Arduino.setTorque(torque, 0x06, 0x01);
+		Arduino.setGripperTorque(torque, 0x05, 0x01);
+		Arduino.setGripperTorque(torque, 0x06, 0x01);
 	}
 	else if (releaseGripper)
 	{
-		Arduino.setTorque(torque, 0x05, 0x02);
+		Arduino.setGripperTorque(torque, 0x05, 0x02);
 		releaseGripper = false;
 	}
 	
@@ -303,50 +316,33 @@ void DataCollector::sendGripperToArduino()
 //Sender pose til arduino (up, down, out, in) //SKAL LAVES OM
 void DataCollector::sendPoseToArduino()
 {
-	if (myoData[0] == 1)
-	{
-		int pos = Arduino.getPosition(3) - 20;
-		std::cout << pos << std::endl;
-		Sleep(50);
-		Arduino.setPosition(pos,3);
-	}
-	else if (1)
-	{
-		int16_t pos2 = Arduino.getPosition(3);
-		std::cout << "POS2:"<<  pos2 << std::endl;
-		Sleep(50);
-		int16_t tete = 1700;
-		Arduino.setPosition((int16_t)1700, 3);
-	}
-	Sleep(50);
+	int pitch{ myoData[6] };
+	int roll{ myoData[5] };
+	Arduino.setJointPosition(1, pitch);
+	Arduino.setJointPosition(2, roll);
 }
 
 
 //Sender orientationen til arduino //SKAL LAVES OM
-void DataCollector::sendOrientationToArduino()
+void DataCollector::sendVelocityToArduino()
 {
-
-	int minmotor1{ 2300 }; //Ticks når motoren er i nul position
-	int maxmotor1{ 1250 }; //Ticks når motoren er i maks position
-	int zeromotor1 = minmotor1;
-	//int zeromotor1 = (maxmotor1 - minmotor1) / 2 + minmotor1; //Ticks når motoren er midtvejs
-	int fullmotor1Deg = 90; //Maks grader man kan bevæge armen
-
-	int minmotor2{ 2750 }; //Ticks når motoren er i nul position
-	int maxmotor2{ 1350 }; //Ticks når motoren er i maks position
-	int zeromotor2 = (maxmotor2 - minmotor2) / 2 + minmotor2; //Ticks når motoren er midtvejs
-	int fullmotor2Deg = 100; //Maks grader man kan bevæge armen
-
-	int16_t goalPosPitch = (maxmotor1 - zeromotor1) / (fullmotor1Deg)*myoData[6] + zeromotor1; //ax+b funktion, udregner ticks ud fra pitch degrees
-	int16_t goalPosRoll = (maxmotor2 - zeromotor2) / (fullmotor2Deg)*myoData[5] + zeromotor2; //ax+b funktion, udregner ticks ud fra roll degrees
-
-	//Send ny position til arduinoen
-	
-	Arduino.setPosition(goalPosPitch, 1);
-	Sleep(50);
-	Arduino.setPosition(goalPosRoll, 2);
-	Sleep(50);
-
+	int velocity{ 50 };
+	if (myoData[0] == 1)
+	{
+		Arduino.setJointVelocity(3, velocity, 0x01);
+	}
+	else if (myoData[1] == 1)
+	{
+		Arduino.setJointVelocity(3, velocity, 0x02);
+	}
+	else if (myoData[2] == 1)
+	{
+		Arduino.setJointVelocity(4, velocity, 0x01);
+	}
+	else if (myoData[3] == 1)
+	{
+		Arduino.setJointVelocity(4, velocity, 0x02);
+	}
 }
 
 //Start threads when constructed

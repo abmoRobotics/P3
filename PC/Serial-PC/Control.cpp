@@ -5,103 +5,45 @@
 #include <vector>
 #include <time.h>
 #include <atlstr.h>
+#include <chrono>
+
 
 
 arduinoCOM::arduinoCOM()
 {	
 }
-//Ikke lavet (den laver emil og anton i arduino)
-double getTorque()
-{
-	
-	return 0;
-}
 
 
-void arduinoCOM::setTorque(int16_t goalTorque, byte motorID, byte direction)
+void arduinoCOM::setGripperTorque(int16_t goalTorque, byte motorID, byte direction)
 {
 	byte goalTorqueByte1 = goalTorque;
 	byte goalTorqueByte2 = (goalTorque >> 8);
 
 	std::vector<byte> GoalTorqueAR = { goalTorqueByte2, goalTorqueByte1, direction };
-	arduinoCOM::serialData(motorID, 0x16, GoalTorqueAR);
+	arduinoCOM::serialData(motorID, 0x12, GoalTorqueAR);
 
-}; // Måske ikke lav
+}; 
 
-int16_t arduinoCOM::getPosition(int motorID)
-{
-	/*
-	char Data[256];
-	Data[0] = 12;
-	Data[1] = motorID;
-	Data[2] = NULL;
-	Data[3] = NULL;
 
-	char incomingData[256] = "";		// don't forget to pre-allocate memory
-	int dataLength = 9;
-	int readResult = 0;
-	*/
-	
-	SP->WriteData(Data, sizeof(Data));
-
-	bool waitForRead = TRUE;
-
-	/*
-	while (readResult == 0) {
-		readResult = SP->ReadData(incomingData, sizeof(incomingData));
-	}
-
-	int16_t firstByte = incomingData[0];
-	int16_t secondByte = (incomingData[1] << 8);	// Shift data 8 bits to the left. 
-	int16_t position = firstByte + secondByte;		// Add the value of the two bytes
-	*/
-	int16_t position{};
-	return position;
-}; // Position in radians
-void arduinoCOM::setPosition(int16_t goalPos, byte motorID)
+void arduinoCOM::setJointPosition(int16_t goalPos, byte motorID)
 {
 	byte goalposByte1 = goalPos;
 	byte goalposByte2 = (goalPos >> 8);
-	byte goalPosAR[2] = {goalposByte1, goalposByte2};
-
-	//arduinoCOM::serialData(motorID, 0x13, goalPosAR);
+	//byte goalPosAR[2] = {goalposByte1, goalposByte2};
+	std::vector<byte> goalPosVec{ goalposByte1, goalposByte2 };
+	arduinoCOM::serialData(motorID, 0x11, goalPosVec);
 	
-}; // Måske ikke lav
-double arduinoCOM::getVelocity(int motorID, char Data[256])
-{
-	Data[0] = 14;
-	Data[1] = motorID;
-	Data[2] = NULL;
-	Data[3] = NULL;
-	char incomingData[256] = "";			// don't forget to pre-allocate memory
-	int dataLength = 255;
-	int readResult = 0;
-
-
-	SP->WriteData(Data, sizeof(Data));
-
-	bool waitForRead = TRUE;
-	while (readResult == 0) {
-		readResult = SP->ReadData(incomingData, dataLength);
-	}
-	printf("%c", incomingData[0]);
-	return incomingData[0];
 };
-void arduinoCOM::setVelocity(int16_t goalVel, byte motorID)
+
+void arduinoCOM::setJointVelocity(int16_t goalVel, byte motorID, byte direction)
 {
 	byte goalVelByte1 = goalVel;
 	byte goalVelByte2 = (goalVel >> 8);
-	byte goalVelAR[2]{ goalVelByte1, goalVelByte2 };
-	//arduinoCOM::serialData(motorID, 0x15, goalVelAR);
+	//byte goalVelAR[2]{ goalVelByte1, goalVelByte2 };
+	std::vector<byte> goalVelVec{ goalVelByte1, goalVelByte2, direction};
+	arduinoCOM::serialData(motorID, 0x10, goalVelVec);
 };
-double getAcceleration() 
-{
-	return 0;
-};
-double setAcceleration() 
-{
-	return 0;
-};
+
 
 void arduinoCOM::serialData(byte motorID, byte Instruction, std::vector<byte> param)
 {
@@ -119,14 +61,14 @@ void arduinoCOM::serialData(byte motorID, byte Instruction, std::vector<byte> pa
 	{
 		datanoCRC.push_back(param[i]);
 	}
-	
+
 
 
 
 	std::vector<unsigned char> CRCVec;
 	CRCVec.insert(CRCVec.end(), header.begin(), header.end());
 	CRCVec.insert(CRCVec.end(), datanoCRC.begin(), datanoCRC.end());
-		
+
 	unsigned char crcArray[30];
 	std::copy(CRCVec.begin(), CRCVec.end(), crcArray);
 
@@ -156,7 +98,7 @@ void arduinoCOM::serialData(byte motorID, byte Instruction, std::vector<byte> pa
 			break;
 		}
 	}
-	
+
 	//std::cout << "Data Sent\n";
 
 

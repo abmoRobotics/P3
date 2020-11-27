@@ -10,13 +10,46 @@ robotArm::robotArm(Dynamixel2Arduino &dxl2){
     startMotors();
 }
 
-void robotArm::setGripperTorque(byte motorID, byte goalTorque[]){
-    digitalWrite(LED_BUILTIN, HIGH);
-    if(goalTorque[2] == 0x02){
+void robotArm::setJointPositition(int motorID, byte goalPosition[])
+{
+    
+	int minmotor1{ 2300 }; //Ticks når motoren er i nul position
+	int maxmotor1{ 1250 }; //Ticks når motoren er i maks position
+	int zeromotor1 = minmotor1;
+	//int zeromotor1 = (maxmotor1 - minmotor1) / 2 + minmotor1; //Ticks når motoren er midtvejs
+	int fullmotor1Deg = 90; //Maks grader man kan bevæge armen
+
+	int minmotor2{ 2750 }; //Ticks når motoren er i nul position
+	int maxmotor2{ 1350 }; //Ticks når motoren er i maks position
+	int zeromotor2 = (maxmotor2 - minmotor2) / 2 + minmotor2; //Ticks når motoren er midtvejs
+	int fullmotor2Deg = 100; //Maks grader man kan bevæge armen
+
+    int recievedGoalPos = (goalPosition[0] << 8) | goalPosition[1];
+    int16_t goalPos{};
+    if(motorID == 1) goalPos = (maxmotor1 - zeromotor1) / (fullmotor1Deg)*recievedGoalPos + zeromotor1; //ax+b funktion, udregner ticks ud fra pitch degrees
+    if(motorID == 2) goalPos = (maxmotor2 - zeromotor2) / (fullmotor2Deg)*recievedGoalPos + zeromotor2; //ax+b funktion, udregner ticks ud fra roll degrees¨
+	
+	
+
+    //Send til kontrolsystem
+}
+
+void robotArm::setJointVelocity(int motorID, byte goalVelocity[])
+{
+    int goalPos = (goalVelocity[0] << 8) | goalVelocity[1];
+}
+
+
+void robotArm::setGripperTorque(byte motorID, byte goalTorque[])
+{
+    //digitalWrite(LED_BUILTIN, HIGH);
+    if(goalTorque[2] == 0x01)
+    {
         float goalPWM = 8.5*((goalTorque[0] << 8) | goalTorque[1]);
         dxl->setGoalPWM(motorID, goalPWM);
     }
-    else if(goalTorque[2] == 0x01){
+    else if(goalTorque[2] == 0x02)
+    {
         dxl->torqueOff(5);
         dxl->torqueOff(6);
         dxl->setOperatingMode(5, OP_POSITION);
@@ -36,21 +69,9 @@ void robotArm::setGripperTorque(byte motorID, byte goalTorque[]){
         dxl->setGoalPWM(6, 0);
 
     }
+    
 }
 
-double robotArm::getTorque(int motorID)
-{
-    double measuredTorque = dxl->getPresentCurrent(motorID);
-    return measuredTorque; 
-}
-
-void robotArm::setTorque(byte motorID, byte goalTorque_ptr[])
-{
-   dxl->torqueOff(motorID);
-    dxl->setOperatingMode(motorID, OP_POSITION);
-
-    dxl->torqueOn(motorID);     
-}
 
 void robotArm::setTorque2(int motorID, float torque, float angularVel){
     float PWM = calculatePWM(motorID, torque, angularVel, 0);
@@ -104,12 +125,8 @@ double robotArm::getPositionRad(int motorID){
     return measuredPOSRad;
 }
 
-void robotArm::setPosition(int motorID, int16_t goalPos){
-
-    dxl->setGoalPosition(motorID, goalPos);
-}
-
-double robotArm::getVelocity(int motorID){
+double robotArm::getVelocity(int motorID)
+{
     double measuredVel = dxl->getPresentVelocity(motorID) * 0.023980823895;
     return measuredVel;
 }
@@ -243,11 +260,6 @@ double robotArm::calculatePWM(int motorid, float torque, float angularVel, float
     // }
     // PWM_old = PWM;
     return PWM;
-}
-
-void robotArm::setVelocity(int motorID, byte goalVel_ptr[]){
-    byte goalVel = (goalVel_ptr[0] << 8) | goalVel_ptr[1];
-    dxl->setGoalVelocity(motorID, goalVel);
 }
 
 double robotArm::calculateMass(int motorID, double Q1, double Q2, double Q3, double Q4){
@@ -561,7 +573,7 @@ bool robotArm::dataGatherer()
     bool debug = false;
     byte header[5]{};
     byte lenght{};
-    //Serial.readBytesUntil(0x00, header, 5);
+    Serial.readBytesUntil(0x00, header, 5);
     if (header[0] == 0xFF && header[1] == 0xFF && header[2] == 0xFD && header[4] == 0x00)
     {
         int starttime = micros();
