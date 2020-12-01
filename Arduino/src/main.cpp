@@ -21,8 +21,6 @@ void setup()
 //robot->setPosition(3, 1090);
 //robot->setPosition(4, 2045);
   //robot->setTorque(4, 0);
-  //lcd.init();
-  //lcd.backlight();
 }
 
 float secondTime;
@@ -54,16 +52,16 @@ void loop()
 // robot->ControlSystem(0, (PI/4)-((indexe%1000)-500)* 0.00157, 0, 0);
 // }
 
-if ((indexe % 1000) < 500)
+if ((indexe % 500) < 250)
 {
   int b = indexe%1000;
- // robot->ControlSystem((PI/2)-0.00314*b, 0, 0, 0);
-  robot->ControlSystem(0, 0, 0.2, 0);
+  //robot->ControlSystem((PI/2)-0.00314*b, 0, 0, 0);
+  robot->ControlSystem(0, PI/4, -0.1, 0.1);
 }
 else {
  //robot->ControlSystem(0+((indexe%1000)-500)*0.00314, 0, 0, 0);
 
-robot->ControlSystem(0, 0, -0.2, 0);
+robot->ControlSystem(PI/2, 0, 0.1, -0.1);
 }
 
 //robot->Tester();
@@ -116,20 +114,20 @@ robot->ControlSystem(0, 0, -0.2, 0);
 
   indexe = indexe + 1;
 
-  if (robot->dataGatherer()){
-  char command = robot->Instruction;
-  int motorID = robot->MotorID;
-    if(command == commandList::setJointVelocity)
-    {
-      robot->setJointVelocity(motorID, robot->Parameters);//Ændre tallet når vi lige finder ud af det
-    }
-    else if (command == commandList::setJointPosition)
-    {
-      robot->setJointPositition(motorID, robot->Parameters);//Ændre tallet når vi lige finder ud af det
-    }
-    else if (command == commandList::setGripperTorque)
-    {
-      robot->setGripperTorque(motorID, robot->Parameters);//Ændre tallet når vi lige finder ud af det
-    }
-  }
+  // if (robot->dataGatherer()){
+  // char command = robot->Instruction;
+  // int motorID = robot->MotorID;
+  //   if(command == commandList::setJointVelocity)
+  //   {
+  //     robot->setJointVelocity(motorID, robot->Parameters);//Ændre tallet når vi lige finder ud af det
+  //   }
+  //   else if (command == commandList::setJointPosition)
+  //   {
+  //     robot->setJointPositition(motorID, robot->Parameters);//Ændre tallet når vi lige finder ud af det
+  //   }
+  //   else if (command == commandList::setGripperTorque)
+  //   {
+  //     robot->setGripperTorque(motorID, robot->Parameters);//Ændre tallet når vi lige finder ud af det
+  //   }
+  // }
 }

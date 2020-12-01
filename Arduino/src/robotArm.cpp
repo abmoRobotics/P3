@@ -34,11 +34,9 @@ void robotArm::setJointPositition(int motorID, byte goalPosition[])
     //Send til kontrolsystem
 }
 
-void robotArm::setJointVelocity(int motorID, byte goalVelocity[])
-{
+void robotArm::setJointVelocity(int motorID, byte goalVelocity[]){
     int goalPos = (goalVelocity[0] << 8) | goalVelocity[1];
 }
-
 
 void robotArm::setGripperTorque(byte motorID, byte goalTorque[])
 {
@@ -136,7 +134,7 @@ double robotArm::calculatePWM(int motorid, float torque, float angularVel, float
     float C2MX28{115.2662};
     float C2MX64{105.3303};
     float C2MX106{160.6181};
-    float C1MX28[3] = {642.9920, 427.3706, 211.7492}; // [0]: positive [1]: stand still [2]: negative rotation
+    float C1MX28[3] = {642.9920, 427.3706, 211.7492}; // [0]: against gravity [1]: stand still [2]: with gravitational help
     float C1MX64[3] = {224.4644, 152.6855, 80.9066};
     float C1MX106[3] = {127.5108, 83.9591, 40.4073};
     int state = 0;
@@ -144,6 +142,7 @@ double robotArm::calculatePWM(int motorid, float torque, float angularVel, float
     double K_C1MX64 = 1435.6;
     double K_C1MX28 = 1;
     static double PWM_old = 0;
+
     // Decide motor constant 1
     if (torque > 0){
         if (rot_dir < 0){
@@ -228,22 +227,34 @@ double robotArm::calculatePWM(int motorid, float torque, float angularVel, float
         // }
     }
     else if (motorid == 3){
-        if (rot_dir < 0.05 && rot_dir > 0){
-            C1MX64[0] = C1MX64[1] + K_C1MX64 * rot_dir; 
-        }
-        else if (rot_dir > - 0.05 && rot_dir < 0){
-            C1MX64[2] = C1MX64[1] + K_C1MX64 * rot_dir;
-        }        
+        // if (rot_dir < 0.05 && rot_dir > 0){
+        //     C1MX64[0] = C1MX64[1] + K_C1MX64 * rot_dir; 
+        // }
+        // else if (rot_dir > - 0.05 && rot_dir < 0){
+        //     C1MX64[2] = C1MX64[1] + K_C1MX64 * rot_dir;
+        // }        
         PWM = torque * C1MX64[state] + angularVel * C2MX64;
+        if (PWM > 200){
+        PWM = 200;
+        }
+        else if (PWM < - 200){
+        PWM = -200;
+        }
     }
     else if (motorid == 4 || motorid == 5 || motorid == 6){
-        if (rot_dir < 0.05 && rot_dir > 0){
-            C1MX28[0] = C1MX28[1] + K_C1MX28 * rot_dir; 
-        }
-        else if (rot_dir > - 0.05 && rot_dir < 0){
-            C1MX28[2] = C1MX28[1] + K_C1MX28 * rot_dir;
-        }  
+        // if (rot_dir < 0.05 && rot_dir > 0){
+        //     C1MX28[0] = C1MX28[1] + K_C1MX28 * rot_dir; 
+        // }
+        // else if (rot_dir > - 0.05 && rot_dir < 0){
+        //     C1MX28[2] = C1MX28[1] + K_C1MX28 * rot_dir;
+        // }  
         PWM = torque * C1MX28[state] + angularVel * C2MX28;
+        if (PWM > 200){
+        PWM = 200;
+        }
+        else if (PWM < - 200){
+        PWM = -200;
+        }
     }
     if (PWM > 885){
         PWM = 885;
@@ -251,6 +262,7 @@ double robotArm::calculatePWM(int motorid, float torque, float angularVel, float
     else if (PWM < - 885){
         PWM = -885;
     }
+    
    
     // if ((PWM - PWM_old) > 40){
     //     PWM = PWM+40;
@@ -406,10 +418,14 @@ double robotArm::calculateGravity(int motorID, double Q1, double Q2, double Q3, 
 }
 
 double robotArm::ControlSystem(double ref_Q1, double ref_Q2, double ref_DQ3, double ref_DQ4){
-    double Kp[4] = {100, 30000, 500, 10};
+    double Kp[4] = {100, 30000, 600, 80};
+    // double KpEmil[4] = {150, 1000, 35, 40};
+    // double KvEmil[2] = {20, 100};
+    // double KiEmil[4] = {0.01, 200, 20, 20};
     double Kv[2] = {50, 15000};
-    double Ki[4] = {0.01, 0, 0, 0};
+    double Ki[4] = {0.01, 0, 2, 1};
     double Kd[4] = {0, 0, 0, 0};
+    double compensatorMass[2] = {0.0021, 0.0033};
     double ts;
     static double ts_old = 0;
     double Ts;    
@@ -444,7 +460,7 @@ double robotArm::ControlSystem(double ref_Q1, double ref_Q2, double ref_DQ3, dou
 
     double error[4] = {ref_Q1-Q[0], ref_Q2-Q[1], ref_DQ3-DQ[2], ref_DQ4-DQ[3]};
     double torque[4];
-        for (int i = 0; i < 0; i++){//Change according to motor
+        for (int i = 0; i < 2; i++){//Change according to motor
         ui[i] = ui_old[i] + ((Ki[i]*Ts)/2)*(error[i]+error_old[i]);
         ud[i] = Kd[i] * ((error[i]-error_old[i])/Ts);
         torque[i] = (((error[i]*Kp[i]) + ui[i] + ud[i] - (DQ[i]*Kv[i])) * calculateMass(i+1, Q[0], Q[1], Q[2], Q[3]) + (calculateCoriolis(i+1, Q[0], Q[1], Q[2], Q[3], DQ[0], DQ[1], DQ[2], DQ[3]) + calculateGravity(i+1, Q[0], Q[1], Q[2], Q[3])));
@@ -452,10 +468,10 @@ double robotArm::ControlSystem(double ref_Q1, double ref_Q2, double ref_DQ3, dou
         ui_old[i] = ui[i];
         error_old[i] = error[i];
         }   
-        for (int i = 2; i < 3; i++){
+        for (int i = 2; i < 4; i++){
         ui[i] = ui_old[i] + ((Ki[i]*Ts)/2)*(error[i]+error_old[i]);
         ud[i] = Kd[i] * ((error[i]-error_old[i])/Ts);
-        torque[i] = (((error[i]*Kp[i]) + ui[i] + ud[i]) * calculateMass(i+1, Q[0], Q[1], Q[2], Q[3]) + (calculateCoriolis(i+1, Q[0], Q[1], Q[2], Q[3], DQ[0], DQ[1], DQ[2], DQ[3]) + calculateGravity(i+1, Q[0], Q[1], Q[2], Q[3])));
+        torque[i] = (((error[i]*Kp[i]) + ui[i] + ud[i]) * compensatorMass[i-2] + (calculateCoriolis(i+1, Q[0], Q[1], Q[2], Q[3], DQ[0], DQ[1], DQ[2], DQ[3]) + calculateGravity(i+1, Q[0], Q[1], Q[2], Q[3])));
         
         ui_old[i] = ui[i];
         error_old[i] = error[i];
@@ -467,21 +483,34 @@ double robotArm::ControlSystem(double ref_Q1, double ref_Q2, double ref_DQ3, dou
     PWM[2] = calculatePWM(3, torque[2], DQ[2], ref_DQ3);
     PWM[3] = calculatePWM(4, torque[3], DQ[3], ref_DQ4);
    // Serial.print(PWM[1]); //Change according to motor
-    //Serial.print(PWM[0]);
-    // Serial.print(" ");
+//    Serial.print(" PWM: ");
+    //Serial.println(PWM[2]);
+//     Serial.print(" Torque: ");
+//     Serial.print(torque[3]);
+      Serial.print(" Ts: ");
     // Serial.print(ref_Q2);
     // Serial.print(" ");
+    // Serial.print(Q[0]);
+    // Serial.print(" ");
+     Serial.print(Ts);
+    // Serial.print(" ");
+    // Serial.print((calculateCoriolis(3, Q[0], Q[1], Q[2], Q[3], DQ[0], DQ[1], DQ[2], DQ[3])));
+    // Serial.print(" ");
+    // Serial.print((calculateGravity(4, Q[0], Q[1], Q[2], Q[3]))*1000);
+    Serial.print(" Position 1: ");
+     Serial.print(Q[0]);
+     Serial.print(" Position 2: ");
+     Serial.print(Q[1]);
+     Serial.print(" Velocity 3: ");
      Serial.print(DQ[2]);
-     Serial.print(" ");
-     Serial.println(torque[2]);
-    //Serial.print(" ");
-    //Serial.print(Q[0]);
-    //Serial.print(" ");
-    //Serial.println(Ts);
-    // Serial.print(" ");
-    // Serial.print(Q[1]);
-    // Serial.print(" ");
-    // Serial.print(DQ[1]);
+    Serial.print(" Velocity 4: ");
+     Serial.println(DQ[3]);
+    //  Serial.print(" kp: ");
+    // Serial.print(error[3]*Kp[3]);
+    // Serial.print(" ui: ");
+    // Serial.println(ui[3]);
+ 
+    // Serial.println(DQ[3]);
     // Serial.print(" ");
     // Serial.print(Q[2]);
     // Serial.print(" ");
@@ -491,8 +520,10 @@ double robotArm::ControlSystem(double ref_Q1, double ref_Q2, double ref_DQ3, dou
     // Serial.print(" ");
     // Serial.println(DQ[3]);
 
-    setPWM(3,PWM[2]); //Change according to motor
-    //Write_Data(PWM[0], PWM[1], PWM[2], PWM[3]);
+    //setPWM(1,PWM[0]); //Change according to motor
+    //setPWM(2,PWM[1]);
+    //Write_Data(0, 0, PWM[2], 0);
+    Write_Data(PWM[0], PWM[1], PWM[2], PWM[3]);
 }
 
 double robotArm::Read_Data(sr_data_conv_t *ReadData, int size){
