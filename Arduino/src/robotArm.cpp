@@ -506,7 +506,7 @@ double robotArm::ControlSystem(double ref_Q1, double ref_Q2, double ref_DQ3, dou
     // 
     //lcd2.setCursor(0,1);
     //robotArm::testPos = Q[2];
-    robotArm::testPos2 = Q[3];
+    robotArm::testPos2 = Ts;
      //Serial.print(" Ts: ");
     // Serial.print(ref_Q2);
     // Serial.print(" ");

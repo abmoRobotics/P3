@@ -21,7 +21,7 @@ void Task1code( void * pvParameters ){
 // else {robot->ControlSystem(PI/2, 0, 0.1, -0.1);}
 robot->ControlSystem(robot->goalPositionJoint1, robot->goalPositionJoint2, robot->goalVelocityJoint3, robot->goalVelocityJoint4);
 //robot->ControlSystem(0, 0, 0, 0);
-
+Serial.println(robot->testPos2);
 
 if(robot->openGripper)
 {
@@ -38,7 +38,7 @@ else if(robot->closeGripper)
   robot->closeGripper = false;
   
 }
-vTaskDelay(20);
+vTaskDelay(2);
 }
 
 }
