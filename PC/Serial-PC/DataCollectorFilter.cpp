@@ -23,12 +23,13 @@ void DataCollector::fistModeTimer() {
 			PlaySound(TEXT("swoosh.wav"), NULL, SND_SYNC);
 			//Sleep(1000);
 			allowRead = true; //Tillader at procenten opdateres
-			Sleep(5000);
+			Sleep(3000);
 			fistControlOn = false;
 			std::cout << "LOCKED" << std::endl;
 			PlaySound(TEXT("targetLocked.wav"), NULL, SND_SYNC);
 			allowRead = false; //Gør at procenten ikke længere opdateres
-			Sleep(1000);
+			//Sleep(1000);
+			
 			allowFist = true; //Opdater, så man igen kan åbne gripperen. (Gøres for at sikre gripperen ikke åbnes ved fejl)
 		}
 		
@@ -83,7 +84,10 @@ void DataCollector::applyFilter() {
 void DataCollector::getPose() {
 
 	//Tjekker hvilken pose der bliver lavet
-	bool movements[6] = {1, 1, 1, 1, 1, 1}; //[up, down, out, in, fist, release]
+	for (size_t i = 0; i < 6; i++)
+	{
+		movements[i] = 1;
+	}
 	for (int i = 0; i < 6; i++) { // Kører igennem alle movements
 		for (int j = 0; j < 8; j++) { // Kører igennem alle filteret pods
 			if (filteredEmg[j] < MinPods[i][j] || filteredEmg[j] > MaxPods[i][j]) { //Hvis pod IKKE er i invervallet
@@ -120,7 +124,7 @@ void DataCollector::getPose() {
 		releaseCounter = 0;
 	}
 
-	if (movements[5] == true && releaseCounter >= 200 && !fistControlOn && allowFist) {
+	if (movements[5] == true && releaseCounter >= 100 && !fistControlOn && allowFist) {
 		procent = 0;
 		myoData[4] = (int)procent;
 		//std::cout << "RELEASE MEEEE RELEASE MY BODY\n";
@@ -262,7 +266,7 @@ void DataCollector::onOrientationData(myo::Myo* myo, uint64_t timestap, const my
 	myoData[6] = newPitch;
 	myoData[7] = newYaw;
 
-	if (showOrientation && finishedSetup) {
+	if (finishedSetup && newRoll == 100000) {
 		std::cout << newRoll << "," << newPitch << "," << newYaw << std::endl;
 	}
 
@@ -271,27 +275,28 @@ void DataCollector::onOrientationData(myo::Myo* myo, uint64_t timestap, const my
 //Sender data til arduino hele tiden 
 void DataCollector::arduinoThread() {
 	while(1) {
-		if (1) {
-			
+		if (finishedSetup)
+		{
 			std::chrono::steady_clock sc;   // create an object of `steady_clock` class
 			auto start = sc.now();     // start timer
 
-			Arduino.setJointPosition(1000, 1);
 			
-
-
-			auto end = sc.now();       // end timer (starting & ending is done by measuring the time at the moment the process started & ended respectively)
-			auto time_span = static_cast<std::chrono::duration<double>>(end - start);   // measure time span between start & end
-			std::cout << "Operation took: " << time_span.count() << " seconds !!!\n";
 			if (fistControlOn || releaseGripper)
 			{
-					sendGripperToArduino();
+				sendGripperToArduino();
+				Arduino.setJointVelocity(3, 0, 0x01);
+				Arduino.setJointVelocity(4, 0, 0x01);
+
 			}
 			else
 			{
-				sendVelocityToArduino();	
+				sendVelocityToArduino();
 				sendPoseToArduino();
 			}
+			//Arduino.setJointPosition(1000, 1);
+			auto end = sc.now();       // end timer (starting & ending is done by measuring the time at the moment the process started & ended respectively)
+			auto time_span = static_cast<std::chrono::duration<double>>(end - start);   // measure time span between start & end
+			//std::cout << "Operation took: " << time_span.count() << " seconds !!!\n";
 		}
 		
 	}
@@ -316,32 +321,53 @@ void DataCollector::sendGripperToArduino()
 //Sender pose til arduino (up, down, out, in) //SKAL LAVES OM
 void DataCollector::sendPoseToArduino()
 {
-	int pitch{ myoData[6] };
-	int roll{ myoData[5] };
-	Arduino.setJointPosition(1, pitch);
-	Arduino.setJointPosition(2, roll);
+	if (finishedSetup)
+	{
+		int pitch{ myoData[6] };
+		int roll{ myoData[5] };
+		
+		if (abs(pitch) > 0 && abs(pitch) < 91)
+		{
+			Arduino.setJointPosition(1, abs(pitch));
+		}
+			
+		
+		
+
+		if (roll < 66 && roll > -66)
+		{
+			Arduino.setJointPosition(2, roll+65);
+		}
+		//std::cout << pitch << "   " << roll << std::endl;
+		
+	}
+	
 }
 
 
 //Sender orientationen til arduino //SKAL LAVES OM
 void DataCollector::sendVelocityToArduino()
 {
-	int velocity{ 50 };
-	if (myoData[0] == 1)
+	int velocity{ 15 };
+	if (movements[1])
 	{
 		Arduino.setJointVelocity(3, velocity, 0x01);
 	}
-	else if (myoData[1] == 1)
+	else if (movements[0])
 	{
 		Arduino.setJointVelocity(3, velocity, 0x02);
 	}
-	else if (myoData[2] == 1)
+	else if (movements[2])
 	{
 		Arduino.setJointVelocity(4, velocity, 0x01);
 	}
-	else if (myoData[3] == 1)
+	else if (movements[3])
 	{
 		Arduino.setJointVelocity(4, velocity, 0x02);
+	}
+	else
+	{
+		Arduino.setJointVelocity(4, velocity, 0x03);
 	}
 }
 
@@ -357,19 +383,18 @@ void DataCollector::startThreads() {
 void DataCollector::setupMyo(){
 	//Loop indtil arduino er connected
 	
-	std::cout << *Arduino.comPort << std::endl;
 	if (!Arduino.isConnected())
 	{
 		std::cout << "Arduino is not connected" << std::endl;
 		Sleep(500);
 	}
-	else if(Arduino.isConnected()) std::cout << "Arduino is connected!" << std::endl;
+	if(Arduino.isConnected()) std::cout << "Arduino is connected!" << std::endl;
 
 	
 
 	//Her kan brugeren bestemme hvilken data de vil vise i terminalen
 	char input;
-
+	//showMyoData = true;
 	std::cout << "Show raw data [y/n]" << std::endl; std::cin >> input;	
 	if (input == 'y') showRawData = true;
 
@@ -443,9 +468,23 @@ void DataCollector::setupMyo(){
 	Sleep(500);
 	std::cout << "- Move arm to factory settings -" << std::endl;
 
+
 	system("pause");
 	std::cout << "Orientation calibrated" << std::endl;
 
+
+	startRoll = roll;
+	//std::cout << "roll: " << startRoll << std::endl;
+
+	startPitch = pitch;
+	//std::cout << "Pitch: " << startPitch << std::endl;
+
+	startYaw = yaw;
+	//std::cout << "Yaw: " << startYaw << std::endl;
+
+	/// 
+	/// COMPLETE
+	/// 
 	Sleep(500);
 
 	std::cout << "Calibration Complete" << std::endl;
@@ -455,7 +494,7 @@ void DataCollector::setupMyo(){
 	T = temp;
 	//Færdiggør setup
 	finishedSetup = true;
-	std::terminate();
+	//std::terminate();
 }
 
 

@@ -63,6 +63,7 @@ private:
 	bool showPose = false;
 	bool showOrientation = false;
 	bool showVisualisation = false;
+	bool movements[6] = { 1, 1, 1, 1, 1, 1 }; //[up, down, out, in, fist, release]
 
 	arduinoCOM Arduino;
 	DataHandler dataHandler;

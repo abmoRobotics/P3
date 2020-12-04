@@ -25,32 +25,36 @@ void arduinoCOM::setGripperTorque(int16_t goalTorque, byte motorID, byte directi
 }; 
 
 
-void arduinoCOM::setJointPosition(int16_t goalPos, byte motorID)
+void arduinoCOM::setJointPosition(byte motorID, int16_t goalPos)
 {
 	byte goalposByte1 = goalPos;
 	byte goalposByte2 = (goalPos >> 8);
 	//byte goalPosAR[2] = {goalposByte1, goalposByte2};
-	std::vector<byte> goalPosVec{ goalposByte1, goalposByte2 };
+	std::vector<byte> goalPosVec{ goalposByte2, goalposByte1};
+	
 	arduinoCOM::serialData(motorID, 0x11, goalPosVec);
 	
 };
 
-void arduinoCOM::setJointVelocity(int16_t goalVel, byte motorID, byte direction)
+void arduinoCOM::setJointVelocity(byte motorID, int16_t goalVel, byte direction)
 {
 	byte goalVelByte1 = goalVel;
 	byte goalVelByte2 = (goalVel >> 8);
 	//byte goalVelAR[2]{ goalVelByte1, goalVelByte2 };
-	std::vector<byte> goalVelVec{ goalVelByte1, goalVelByte2, direction};
+	std::vector<byte> goalVelVec{ goalVelByte2, goalVelByte1, direction};
 	arduinoCOM::serialData(motorID, 0x10, goalVelVec);
 };
 
 
 void arduinoCOM::serialData(byte motorID, byte Instruction, std::vector<byte> param)
 {
-	
+	clock_t startTime;
+	startTime = clock();
+
 	byte messagelenght = param.size() + 4;
 	std::vector<byte> paramVec;
-
+	std::chrono::steady_clock sc;   // create an object of `steady_clock` class
+	auto start = sc.now();     // start timer
 	std::vector<byte> header{ 0xff, 0xff, 0xfd, messagelenght, 0x00 };
 	std::vector<byte> datanoCRC;
 
@@ -87,19 +91,21 @@ void arduinoCOM::serialData(byte motorID, byte Instruction, std::vector<byte> pa
 	byte acknowledgeByte{};
 	char incomingData[256] = "";			// don't forget to pre-allocate memory
 	int dataLength = 255;
-	clock_t startTime;
-	startTime = clock();
-	while (incomingData[0] != 0x06)
+
+	while (incomingData[0] != 0x06 && incomingData[1] != 0x0D)
 	{
 		acknowledgeByte = SP->ReadData(incomingData, dataLength);
-		if ((clock() - startTime) / CLOCKS_PER_SEC >= 1)
+		if ((clock() - startTime) / CLOCKS_PER_SEC >= 0.5)
 		{
 			std::cout << "FAILED TO ACKNOWLEDGE DATA\n";
 			break;
 		}
 	}
-
-	//std::cout << "Data Sent\n";
+	Sleep(10);
+	//std::cout << "Data Sent     " << timeSpent << std::endl;
+	auto end = sc.now();       // end timer (starting & ending is done by measuring the time at the moment the process started & ended respectively)
+	auto time_span = static_cast<std::chrono::duration<double>>(end - start);   // measure time span between start & end
+	//std::cout << "Operation took: " << time_span.count() << " seconds !!!\n";
 
 
 

@@ -1,54 +1,110 @@
 #include <robotArm.h>
 #include <Dynamixel2Arduino.h>
-
+#include <math.h>
+//LiquidCrystal_I2C lcd2(0x27, 16, 2);
 robotArm::robotArm(Dynamixel2Arduino &dxl2){
     dxl = &dxl2;
+    
     const float DXL_PROTOCOL_VERSION = 2.0;
     dxl->begin(1000000);
     dxl->setPortProtocolVersion(DXL_PROTOCOL_VERSION);
-
     startMotors();
 }
 
 void robotArm::setJointPositition(int motorID, byte goalPosition[]) // Jacob skal bruge den
 {
     
-	int minmotor1{ 2300 }; //Ticks når motoren er i nul position
-	int maxmotor1{ 1250 }; //Ticks når motoren er i maks position
-	int zeromotor1 = minmotor1;
-	//int zeromotor1 = (maxmotor1 - minmotor1) / 2 + minmotor1; //Ticks når motoren er midtvejs
-	int fullmotor1Deg = 90; //Maks grader man kan bevæge armen
+	// int minmotor1{ 2300 }; //Ticks når motoren er i nul position
+	// int maxmotor1{ 1250 }; //Ticks når motoren er i maks position
+	// int zeromotor1 = minmotor1;
+	// //int zeromotor1 = (maxmotor1 - minmotor1) / 2 + minmotor1; //Ticks når motoren er midtvejs
+	// int fullmotor1Deg = 90; //Maks grader man kan bevæge armen
 
-	int minmotor2{ 2750 }; //Ticks når motoren er i nul position
-	int maxmotor2{ 1350 }; //Ticks når motoren er i maks position
-	int zeromotor2 = (maxmotor2 - minmotor2) / 2 + minmotor2; //Ticks når motoren er midtvejs
-	int fullmotor2Deg = 100; //Maks grader man kan bevæge armen
+	// int minmotor2{ 2750 }; //Ticks når motoren er i nul position
+	// int maxmotor2{ 1350 }; //Ticks når motoren er i maks position
+	// int zeromotor2 = (maxmotor2 - minmotor2) / 2 + minmotor2; //Ticks når motoren er midtvejs
+	// int fullmotor2Deg = 100; //Maks grader man kan bevæge armen
 
     int recievedGoalPos = (goalPosition[0] << 8) | goalPosition[1];
-    int16_t goalPos{};
-    if(motorID == 1) goalPos = (maxmotor1 - zeromotor1) / (fullmotor1Deg)*recievedGoalPos + zeromotor1; //ax+b funktion, udregner ticks ud fra pitch degrees
-    if(motorID == 2) goalPos = (maxmotor2 - zeromotor2) / (fullmotor2Deg)*recievedGoalPos + zeromotor2; //ax+b funktion, udregner ticks ud fra roll degrees¨
-	
-	
+    
+    if(motorID == 1)  robotArm::goalPositionJoint1  = recievedGoalPos*PI/180; 
+    
+     
+    if(motorID == 2) robotArm::goalPositionJoint2 = ((recievedGoalPos-65)*PI/180)*-1; 
 
-    //Send til kontrolsystem
 }
 
 void robotArm::setJointVelocity(int motorID, byte goalVelocity[]){ // Jacob skal bruge den
-    int goalPos = (goalVelocity[0] << 8) | goalVelocity[1];
+    int goalVel = (goalVelocity[0] << 8) | goalVelocity[1];
+    robotArm::testPos = goalVel;
+    if(motorID == 3)
+    {
+        
+        if(goalVelocity[2] == 0x01)
+        {
+        robotArm::goalVelocityJoint3 = (goalVel)*PI/180;
+        robotArm::goalVelocityJoint4 = 0;
+        }
+        else if(goalVelocity[2] == 0x02)
+        {
+        robotArm::goalVelocityJoint3 = (goalVel*-1)*PI/180;
+        robotArm::goalVelocityJoint4 = 0;
+        }
+        else if(goalVelocity[2] == 0x03)
+        {
+            robotArm::goalVelocityJoint3 = 0;
+            robotArm::goalVelocityJoint4 = 0;
+        }
+    } 
+    else if(motorID == 4)
+    {
+        
+        if(goalVelocity[2] == 0x01)
+        {
+        robotArm::goalVelocityJoint3 = 0;
+        robotArm::goalVelocityJoint4 = (goalVel)*PI/180;
+        }
+        else if(goalVelocity[2] == 0x02)
+        {
+        robotArm::goalVelocityJoint3 = 0;
+        robotArm::goalVelocityJoint4 = (goalVel*-1)*PI/180;
+        }
+        else if(goalVelocity[2] == 0x03)
+        {
+            robotArm::goalVelocityJoint3 = 0;
+            robotArm::goalVelocityJoint4 = 0;
+        }
+
+    }
+    
+    
 }
 
-void robotArm::setGripperTorque(byte motorID, byte goalTorque[])
+void robotArm::setGripperTorque(byte goalTorque[])
 {
-    //digitalWrite(LED_BUILTIN, HIGH);
     if(goalTorque[2] == 0x01)
     {
-        float goalPWM = 8.5*((goalTorque[0] << 8) | goalTorque[1]);
-        dxl->setGoalPWM(motorID, goalPWM);
+        robotArm::closeGripper = true;
+        robotArm::gripperTorque = 8.5*((goalTorque[0] << 8) | goalTorque[1]);
+
+        
+
     }
     else if(goalTorque[2] == 0x02)
     {
-        dxl->torqueOff(5);
+        robotArm::openGripper = true;
+        
+
+    }
+    else if(goalTorque[2] == 0x03)
+    {
+        robotArm::closeGripper = false;
+    }
+    
+}
+void robotArm::openGripperFunc()
+{
+    dxl->torqueOff(5);
         dxl->torqueOff(6);
         dxl->setOperatingMode(5, OP_POSITION);
         dxl->setOperatingMode(6, OP_POSITION);
@@ -65,8 +121,13 @@ void robotArm::setGripperTorque(byte motorID, byte goalTorque[])
         dxl->torqueOn(6);
         dxl->setGoalPWM(5, 0);
         dxl->setGoalPWM(6, 0);
+        robotArm::openGripper = false;
+}
 
-    }
+void robotArm::closeGripperFunc(float goalPWM)
+{
+    dxl->setGoalPWM(5, goalPWM);
+    dxl->setGoalPWM(6, goalPWM);
     
 }
 
@@ -388,6 +449,8 @@ double robotArm::ControlSystem(double ref_Q1, double ref_Q2, double ref_DQ3, dou
     static double Q_old[4] = {Q[0], Q[1], Q[2], Q[3]};
     static double DQ_old[4] = {DQ[0], DQ[1], DQ[2], DQ[3]};
 
+
+    
     for (size_t i = 0; i < 4; i++)
     {
        if (abs(DQ_old[i] - DQ[i]) > 3){
@@ -423,7 +486,8 @@ double robotArm::ControlSystem(double ref_Q1, double ref_Q2, double ref_DQ3, dou
         error_old[i] = error[i];
         }
 
-        
+    robotArm::error = error[1];
+    robotArm::refpos = ref_Q2;
         
 
     PWM[0] = calculatePWM(1, torque[0], DQ[0], error[0]);
@@ -440,19 +504,21 @@ double robotArm::ControlSystem(double ref_Q1, double ref_Q2, double ref_DQ3, dou
     //     Ts = millis() - ts_old;
     // }
     // 
-
-     Serial.print(" Ts: ");
+    //lcd2.setCursor(0,1);
+    //robotArm::testPos = Q[2];
+    robotArm::testPos2 = Q[3];
+     //Serial.print(" Ts: ");
     // Serial.print(ref_Q2);
     // Serial.print(" ");
-    // Serial.print(Q[0]);
+    // Serial.println(Q[0]);
     // Serial.print(" ");
-     Serial.println(Ts);
+    // Serial.println(Ts);
     // Serial.print(" Coriolis: ");
     //  Serial.print((calculateCoriolis(1, Q[0], Q[1], Q[2], Q[3], DQ[0], DQ[1], DQ[2], DQ[3])));
     // Serial.print(" ");
     // Serial.print((calculateGravity(4, Q[0], Q[1], Q[2], Q[3]))*1000);
     // Serial.print(" Position_1: ");
-    //  Serial.print(Q[0]);
+    //Serial.println(Q[0]);
     //  Serial.print(" Position_2: ");
     //  Serial.print(Q[1]);
     //  Serial.print(" Velocity_3: ");
@@ -562,7 +628,7 @@ double robotArm::Write_Data(double tau1, double tau2, double tau3, double tau4){
 
 bool robotArm::dataGatherer()
 {
-    digitalWrite(LED_BUILTIN, LOW);
+    digitalWrite(4, LOW);
     bool debug = false;
     byte header[5]{};
     byte lenght{};
@@ -641,7 +707,6 @@ bool robotArm::dataGatherer()
         
         if (CalcCRC == RecievedCRC)
         {
-            //digitalWrite(LED_BUILTIN, HIGH);
             for (size_t i = 0; i < sizeof(ReadData) - 2; i++)
             {
                 robotArm::Parameters[i] = Param[i];

@@ -5,11 +5,11 @@
 class arduinoCOM
 {
 public:
-    const char* comPort{ "COM8" };
-    Serial* SP = new Serial(comPort);    // adjust as needed
+    const char* comPort{ "\\\\.\\COM15" };
+    Serial* SP = new Serial("\\\\.\\COM15");    // adjust as needed
     void setGripperTorque(int16_t goalTorque, byte motorID, byte direction); // Måske ikke lav
-    void setJointPosition(int16_t goalPos, byte motorID); // Måske ikke lav
-    void setJointVelocity(int16_t goalVel, byte motorID, byte direction);
+    void setJointPosition(byte motorID, int16_t goalPos); // Måske ikke lav
+    void setJointVelocity(byte motorID, int16_t goalVel, byte direction);
     bool isConnected() { return SP->IsConnected(); };
     unsigned short CalculateCRC(unsigned short crc_accum, unsigned char* data_blk_ptr, unsigned short data_blk_size);
     void serialData(byte motorID, byte Instruction, std::vector<byte>);

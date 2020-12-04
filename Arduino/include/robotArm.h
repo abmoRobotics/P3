@@ -1,6 +1,7 @@
 #pragma once
 #include "Dynamixel2Arduino.h"
 #define DXL_SERIAL Serial2
+#include "LiquidCrystal_I2C.h"
 
 
 class robotArm
@@ -57,16 +58,19 @@ public:
 };
 */
 public:
-    char Instruction{};
-    int MotorID{};
-    byte Parameters[]{};
+   
+
+    
+
 
 
     robotArm(Dynamixel2Arduino &dxl);
     void startMotors();
-    void setGripperTorque(byte motorID, byte goaltorque[]);
+    void setGripperTorque(byte goaltorque[]);
     void setJointVelocity(int motorID, byte goalVelocity[]);
     void setJointPositition(int motorID, byte goalPosition[]);
+    void openGripperFunc();
+    void closeGripperFunc(float goalPWM);
 
     int16_t getPosition(int motorID);   // Position in ticks
     double getPositionRad(int motorID); // Position in Rads
@@ -87,6 +91,24 @@ public:
     void SaveData(int Actual, int Ref);
     void PrintData();
     double Tester();
+
+    char Instruction{};
+    int MotorID{};
+    byte Parameters[]{};
+    float PeterVenkman{}; //MÅ ALDRIG SLETTES
+    float goalPositionJoint1{0};
+    float goalPositionJoint2{0};
+    float goalVelocityJoint3{0};
+    float goalVelocityJoint4{0};
+    float testPos{0};
+    float testPos2{0};
+    float error{};
+    float refpos{};
+    float plsWork = 0;
+    bool openGripper{false};
+    bool closeGripper{false};
+    float gripperTorque{};
+    
 };
 enum commandList {
      setJointVelocity = 0x10,
