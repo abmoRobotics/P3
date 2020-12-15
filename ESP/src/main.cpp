@@ -33,7 +33,6 @@ else if(robot->closeGripper)
   {
     robot->closeGripperFunc(robot->gripperTorque);
     robot->ControlSystem(robot->goalPositionJoint1, robot->goalPositionJoint2, robot->goalVelocityJoint3, robot->goalVelocityJoint4);
-    delay(1);
   }
   robot->closeGripper = false;
   
